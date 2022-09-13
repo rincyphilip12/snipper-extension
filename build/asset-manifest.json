@@ -1,0 +1,18 @@
+{
+  "files": {
+    "popup.css": "/static/css/popup.css",
+    "popup.js": "/static/js/popup.js",
+    "content.js": "/static/js/content.js",
+    "static/js/787.js": "/static/js/787.js",
+    "static/media/tick.svg": "/static/media/tick.6ade27777778fcdd91d9b625c502a4b3.svg",
+    "popup.html": "/popup.html",
+    "popup.css.map": "/static/css/popup.css.map",
+    "popup.js.map": "/static/js/popup.js.map",
+    "content.js.map": "/static/js/content.js.map",
+    "787.js.map": "/static/js/787.js.map"
+  },
+  "entrypoints": [
+    "static/css/popup.css",
+    "static/js/popup.js"
+  ]
+}
