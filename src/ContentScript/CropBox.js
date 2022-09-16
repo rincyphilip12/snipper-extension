@@ -155,7 +155,7 @@ const CropBox = forwardRef(({ port, filledBoxStyle, setFilledBoxStyle ,isFabBtnA
 
             <div className="crop-box" style={filledBoxStyle} ref={filledBoxRef}></div>
 
-            <div className="marker-box" style={{ left: filledBoxStyle.left, top: filledBoxStyle.top + filledBoxStyle.height }}>
+            <div className="marker-box" style={{ left: filledBoxStyle.left, top: filledBoxStyle.top + filledBoxStyle.height , visibility : `${ (filledBoxStyle.width > 0 || filledBoxStyle.height >0) ? 'visible' : 'hidden'}` }}>
                 <button className="done-btn" onClick={snapshotCaptureHandler}>
                     <TickSVG />
                 </button>

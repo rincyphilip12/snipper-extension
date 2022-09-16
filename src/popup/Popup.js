@@ -93,7 +93,7 @@ function Popup() {
         }`}
       </style>
       <main className="App-header">
-        <h1>SNIPPER FOR PORTAL</h1>
+        <h1>PORTAL SNAPPER</h1>
 
         {/* <!-- Rounded switch --> */}
         <label className="switch">
