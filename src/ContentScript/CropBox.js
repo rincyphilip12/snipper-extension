@@ -98,6 +98,7 @@ const CropBox = forwardRef(({ port, filledBoxStyle, setFilledBoxStyle ,isFabBtnA
                 z-index:999998;
                 top:0;
                 position:fixed;
+                cursor: crosshair;
             }
             .crop-box{
                 position:absolute;
@@ -133,6 +134,7 @@ const CropBox = forwardRef(({ port, filledBoxStyle, setFilledBoxStyle ,isFabBtnA
                 border-radius:50%;
                 border:none;
                 padding:0;
+                cursor:pointer;
             }
            `}
         </style>

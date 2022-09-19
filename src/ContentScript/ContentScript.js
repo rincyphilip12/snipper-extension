@@ -78,7 +78,7 @@ function ContentScript() {
               font-size:24px;
               font-weight:800;
               background:black;
-             
+              cursor:pointer;
           }
           .fab.on-mode{
             background:white;

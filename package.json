@@ -135,5 +135,5 @@
       "react-app"
     ]
   },
-  "proxy":"https://www.teamwork.com"
+  "proxy": "https://www.teamwork.com"
 }
