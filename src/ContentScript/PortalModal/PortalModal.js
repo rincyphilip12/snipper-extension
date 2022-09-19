@@ -184,7 +184,6 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
             {` /* The Modal (background) */
           .modal {
             font-family: "Roboto", sans-serif;
-            display:block;
             position: fixed; /* Stay in place */
             z-index: 1000000; /* Sit on top */
             left: 0;
@@ -194,21 +193,31 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
             overflow: auto; /* Enable scroll if needed */
             background-color: rgb(0,0,0); /* Fallback color */
             background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
          
           }
 
           /* Modal Content/Box */
           .modal-content {
             background-color: #fefefe;
-            margin: 15% auto; /* 15% from the top and centered */
+            margin: 2% auto; /* 15% from the top and centered */
             padding: 20px;
             border: 1px solid #888;
             width: 80%; /* Could be more or less, depending on screen size */
-            border-radius:20px;
-
+            max-width:800px;
+            border-radius:10px;
+          }
+          .modal-content header{
+              margin-bottom:30px;
+              position:relative
           }
           .modal-header-text{
-              display:inline-block;
+              display:block;
+              text-align:center;
+              font-size:26px;
           }
 
           #preview-image{
@@ -217,10 +226,13 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
           }
           /* The Close Button */
           .close {
-            color: #aaa;
-            float: right;
+            color: #343434;
+            position:absolute;
+            top:0;
+            right:0;
             font-size: 28px;
             font-weight: bold;
+            transition:0.3s ease-in-out
           }
 
           .close:hover,
@@ -228,7 +240,81 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
             color: black;
             text-decoration: none;
             cursor: pointer;
-          }`
+            transform:scale(1.1);
+          }
+          .result-preview{
+            width:400px;
+        }
+        input,
+        select{
+            height:32px;
+            padding: 0 5px;
+            color: #333;
+            border:1px solid #cfcfcf;
+            border-radius: 3px;
+            width:100%;
+        }
+        *{
+            box-sizing:border-box;
+            margin:0;
+            padding:0;
+        }
+        h1,h2,h3,h4,h5,h6,p,.l-title{
+            color:#343434;
+        }
+        .l-title{
+            margin-bottom:20px;
+        }
+        .l-title--sm{
+            font-size:18px;
+            margin-bottom:10px;
+        }
+        .l-btn{
+            background: #343434;
+            border: none;
+            color: #fff;
+            padding: 10px 20px;
+            transition:0.3s ease-in-out;
+            cursor:pointer;
+        }
+        .l-btn--dark{
+            background: #343434;
+        }
+        .l-btn--dark:hover{
+            background:#000;
+        }
+        .l-btn:hover{
+            background:#000;
+        }
+        .l-row{
+            display:flex;
+            flex-wrap:wrap;
+            margin:0 -10px;
+        }
+        .l-row .l-col{
+            padding: 0 10px;
+        }
+        .l-col{
+            margin-bottom:20px;
+        }
+        .l-col--3{
+            flex-basis:25%;
+        }
+        .l-col--4{
+            flex-basis: 33.33333333%;
+        }
+        .l-col--6{
+            flex-basis:50%;
+        }
+        label span{
+            display:inline-block;
+            margin-bottom:5px;
+            color:#343434;
+        }
+        .screenshot__preview{
+            margin-top:30px;
+            text-align:center;
+        }`
             }
         </style>
 
@@ -241,22 +327,25 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
                     <h1 class="modal-header-text">PORTAL APP - WHITE RABBIT GROUP</h1>
                     <span class="close" onClick={closePortalModalHandler}>&times;</span>
                 </header>
+                <div class="screenshot-wrapper">
+                    <div class="screenshot__form">
+                        {/* ------------ LOGIN -------------  */}
+                        {
+                            formActive === 'login' && <LoginForm submitLoginFormHandr={submitLoginFormHandr} />
+                        }
 
-                {/* ------------ LOGIN -------------  */}
-                {
-                    formActive === 'login' && <LoginForm submitLoginFormHandr={submitLoginFormHandr} />
-                }
+                        {
+                            formActive === 'details' && <TaskDetailForm pendingFileRef={pendingFileRef} projects={projects} fetcher={fetcher} />
 
-                {
-                    formActive === 'details' && <TaskDetailForm pendingFileRef={pendingFileRef} projects={projects} fetcher={fetcher} />
-
-                }
-                {/* ------------- IMAGE PREVIEW -------------- */}
-                <section>
-                    <h3>IMAGE PREVIEW</h3>
-                    <canvas id="preview-image" ref={previewImageCanvasRef} >
-                    </canvas>
-                </section>
+                        }
+                        {/* ------------- IMAGE PREVIEW -------------- */}
+                    </div>
+                    <div class="screenshot__preview">
+                        <h2 class="l-title l-title--sm">IMAGE PREVIEW</h2>
+                        <canvas className="result-preview" id="preview-image" ref={previewImageCanvasRef} >
+                        </canvas>
+                    </div>
+                </div>
             </div>
         </div>
     </>

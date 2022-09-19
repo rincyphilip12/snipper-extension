@@ -10,20 +10,23 @@ function LoginForm({ submitLoginFormHandr }) {
     // ------------------- RENDER -----------------
     return (
         <section className="login-form">
-            <h3>PORTAL LOGIN</h3>
+            <h2 class="l-title l-title--sm">PORTAL LOGIN</h2>
 
             <form action="" >
-                <label htmlFor="">
-                    <p>USER NAME </p>
-                    <input type="text" name="file" ref={usernameRef} />
-                </label>
+                <div class="l-col">
+                    <label htmlFor="">
+                        <span>USER NAME </span>
+                        <input type="text" name="file" ref={usernameRef} />
+                    </label>
+                </div>
+                <div class="l-col">
+                    <label htmlFor="">
+                        <span>PASSWORD </span>
+                        <input type="password" ref={passwordRef} />
+                    </label>
+                </div>
 
-                <label htmlFor="">
-                    <p>PASSWORD </p>
-                    <input type="password" ref={passwordRef} />
-                </label>
-
-                <button type="button" onClick={(e) => submitLoginFormHandr(usernameRef.current.value, passwordRef.current.value)}>LOGIN</button>
+                <button class="l-btn l-btn--dark" type="button" onClick={(e) => submitLoginFormHandr(usernameRef.current.value, passwordRef.current.value)}>LOGIN</button>
             </form>
         </section>
     )
