@@ -219,6 +219,11 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
               text-align:center;
               font-size:26px;
           }
+          .screenshot-wrapper{
+            max-height: 80vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+          }
 
           #preview-image{
               border:1px dashed;
@@ -243,7 +248,7 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
             transform:scale(1.1);
           }
           .result-preview{
-            width:400px;
+            width:600px;
         }
         input,
         select{
@@ -314,6 +319,18 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
         .screenshot__preview{
             margin-top:30px;
             text-align:center;
+        }
+        .screenshot-wrapper::-webkit-scrollbar {
+            width: 8px;
+        }
+        .screenshot-wrapper::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .screenshot-wrapper::-webkit-scrollbar-thumb {
+            background: #343434;
+        }
+        .screenshot-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #000;
         }`
             }
         </style>
