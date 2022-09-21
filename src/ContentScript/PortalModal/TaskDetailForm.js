@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-function TaskDetailForm({ pendingFileRef, projects, fetcher }) {
+function TaskDetailForm({ pendingFileRef, projects, fetcher, showToastMessage }) {
 
     const [taskList, setTaskLists] = useState([]);
     const selectedTaskId = useRef();
@@ -46,7 +46,7 @@ function TaskDetailForm({ pendingFileRef, projects, fetcher }) {
     const createSubTaskHandler = async (e) => {
 
         if (!(contentRef?.current?.value && descriptionRef?.current?.value && pendingFileRef?.current && selectedPriority?.current && selectedTaskId?.current)) {
-            alert('Please enter complete details');
+            showToastMessage('Please enter complete details');
             return;
         }
         try {
@@ -61,11 +61,12 @@ function TaskDetailForm({ pendingFileRef, projects, fetcher }) {
 
             const res = await fetcher(`tasks/${selectedTaskId?.current}.json`, 'POST', JSON.stringify(reqBody));
             if (res?.STATUS === 'OK')
-                alert('SUB TASK SUCCESSFULLY CREATED')
+                showToastMessage('Sub Task has been created succesfully')
             else if (res?.STATUS === 'Error')
                 throw new Error(res?.MESSAGE)
 
         } catch (e) {
+            showToastMessage('Error in sub task creation')
             console.error(e)
         }
     }

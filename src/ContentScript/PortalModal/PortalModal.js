@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useEffect, useState } from "react";
 import LoginForm from "./LoginForm";
 import TaskDetailForm from './TaskDetailForm';
-
+import Toast from "./Toast";
 function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }) {
 
     const previewImageCanvasRef = useRef(null);
@@ -9,7 +9,8 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
     const [projects, setProjects] = useState([]);
     const pendingFileRef = useRef();
     const encodedToken = useRef();
-    
+    const [toastMsg, setToastMsg] = useState('');
+
     // ------------------- INIT FUNCTION  - GETS SAVED CREDS-----------------------
     useEffect(() => {
         try {
@@ -79,7 +80,7 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
                 if (username && pwd)
                     encodedToken.current = (btoa(`${username}:${pwd}`));
                 else
-                    alert('Enter the credentials')
+                showToastMessage('Enter the credentials')
                 getProjects();
             }
         }
@@ -102,7 +103,7 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
             });
 
             if (userCreds?.password && userCreds?.password) {// CREDS ALREADY AVAILABLE
-                encodedToken.current =(btoa(`${userCreds?.id}:${userCreds?.password}`)); 
+                encodedToken.current = (btoa(`${userCreds?.id}:${userCreds?.password}`));
                 getProjects();
             }
             else {
@@ -142,22 +143,16 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
     const fetcher = async (url, method, body, headers, isAbsolute, withoutAuth) => {
 
         const BASE_URL = 'https://portal.whiterabbit.group/';
-        const HEADER = {
-            // "Content-type": "application/json",
-        }
-        console.log(encodedToken)
+
         if (!encodedToken.current) {// Check if token is available
-            alert('Token is invalid', url)
+            showToastMessage('Token is invalid', url)
             return;
         }
 
         const customHdrs = {
-            ...HEADER,
             ...(!withoutAuth && { 'Authorization': `Basic ${encodedToken.current}` }),
             ...headers
         }
-
-        console.log(customHdrs)
 
         let options = {
             method: method,
@@ -177,6 +172,11 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
         catch (err) {
             console.error(err)
         }
+    }
+
+    // ----------------------- SHOW TOAST MESSAGE ----------- 
+    const showToastMessage = (msg) => {
+        setToastMsg(msg)
     }
 
     return (<>
@@ -339,23 +339,28 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
 
             {/* <!-- Modal content --> */}
             <div class="modal-content">
+                {/* ---------------TOAST---------------- */}
+                <Toast toastMsg={toastMsg} setToastMsg={setToastMsg} />
 
+                {/* -------- HEADER ------- */}
                 <header>
                     <h1 class="modal-header-text">PORTAL APP - WHITE RABBIT GROUP</h1>
                     <span class="close" onClick={closePortalModalHandler}>&times;</span>
                 </header>
                 <div class="screenshot-wrapper">
                     <div class="screenshot__form">
+
+
                         {/* ------------ LOGIN -------------  */}
                         {
                             !formActive && <p>Loading.....</p>
                         }
                         {
-                            formActive === 'login' && <LoginForm submitLoginFormHandr={submitLoginFormHandr} />
+                            formActive === 'login' && <LoginForm submitLoginFormHandr={submitLoginFormHandr} showToastMessage={showToastMessage} />
                         }
 
                         {
-                            formActive === 'details' && <TaskDetailForm pendingFileRef={pendingFileRef} projects={projects} fetcher={fetcher} />
+                            formActive === 'details' && <TaskDetailForm pendingFileRef={pendingFileRef} projects={projects} fetcher={fetcher} showToastMessage={showToastMessage} />
 
                         }
                         {/* ------------- IMAGE PREVIEW -------------- */}
@@ -365,9 +370,12 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
                         <canvas className="result-preview" id="preview-image" ref={previewImageCanvasRef} >
                         </canvas>
                     </div>
+
                 </div>
             </div>
         </div>
+
+
     </>
     )
 }
