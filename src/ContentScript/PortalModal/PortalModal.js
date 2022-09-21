@@ -1,15 +1,13 @@
 import { useLayoutEffect, useRef, useEffect, useState } from "react";
 import LoginForm from "./LoginForm";
 import TaskDetailForm from './TaskDetailForm';
-import Toast from "./Toast";
-function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }) {
+function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler , showToastMessage}) {
 
     const previewImageCanvasRef = useRef(null);
     const [formActive, setFormActive] = useState(false);
     const [projects, setProjects] = useState([]);
     const pendingFileRef = useRef();
     const encodedToken = useRef();
-    const [toastMsg, setToastMsg] = useState('');
 
     // ------------------- INIT FUNCTION  - GETS SAVED CREDS-----------------------
     useEffect(() => {
@@ -70,6 +68,13 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
         try {
             if (window.PasswordCredential || window.FederatedCredential) {
 
+                if (username && pwd)
+                    encodedToken.current = (btoa(`${username}:${pwd}`));
+                else {
+                    showToastMessage('Enter the credentials')
+                    return
+                }
+
                 const creds = new window.PasswordCredential({
                     id: username,
                     password: pwd,
@@ -77,10 +82,7 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
                 });
 
                 const res = await navigator.credentials.store(creds);
-                if (username && pwd)
-                    encodedToken.current = (btoa(`${username}:${pwd}`));
-                else
-                showToastMessage('Enter the credentials')
+
                 getProjects();
             }
         }
@@ -102,7 +104,7 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
                 unmediated: true
             });
 
-            if (userCreds?.password && userCreds?.password) {// CREDS ALREADY AVAILABLE
+            if (userCreds?.id && userCreds?.password) {// CREDS ALREADY AVAILABLE
                 encodedToken.current = (btoa(`${userCreds?.id}:${userCreds?.password}`));
                 getProjects();
             }
@@ -172,11 +174,6 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
         catch (err) {
             console.error(err)
         }
-    }
-
-    // ----------------------- SHOW TOAST MESSAGE ----------- 
-    const showToastMessage = (msg) => {
-        setToastMsg(msg)
     }
 
     return (<>
@@ -335,12 +332,12 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
             }
         </style>
 
+
+
         <div id="portalModal" class="modal" >
 
             {/* <!-- Modal content --> */}
             <div class="modal-content">
-                {/* ---------------TOAST---------------- */}
-                <Toast toastMsg={toastMsg} setToastMsg={setToastMsg} />
 
                 {/* -------- HEADER ------- */}
                 <header>
@@ -360,7 +357,8 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
                         }
 
                         {
-                            formActive === 'details' && <TaskDetailForm pendingFileRef={pendingFileRef} projects={projects} fetcher={fetcher} showToastMessage={showToastMessage} />
+                            formActive === 'details' && <TaskDetailForm
+                                pendingFileRef={pendingFileRef} projects={projects} fetcher={fetcher} showToastMessage={showToastMessage} />
 
                         }
                         {/* ------------- IMAGE PREVIEW -------------- */}

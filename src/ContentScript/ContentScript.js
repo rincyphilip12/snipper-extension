@@ -1,8 +1,8 @@
 /*global chrome*/
-import {useRef, useState } from "react";
+import { useRef, useState } from "react";
 import CropBox from "./CropBox";
 import PortalModal from "./PortalModal/PortalModal";
-
+import Toast from "./Toast";
 function ContentScript() {
 
   // ------- INITS -----
@@ -10,8 +10,15 @@ function ContentScript() {
   const [isFabBtnActive, setIsFabBtnActive] = useState(false);
   const [isFabBtnVisible, setIsFabBtnVisible] = useState(false);
   const [portalModalData, setPortalModalData] = useState({});
-  const [filledBoxStyle,setFilledBoxStyle] = useState({});
+  const [filledBoxStyle, setFilledBoxStyle] = useState({});
+  const [toastMsg, setToastMsg] = useState('');
+
   const cropBoxRef = useRef();
+
+  // ----------------------- SHOW TOAST MESSAGE ----------- 
+  const showToastMessage = (msg, closeModal) => {
+    setToastMsg(msg);
+  }
   // --------  PORT -------- 
   let port = chrome.runtime.connect({ name: "FAB_BTN_PORT" });
 
@@ -99,13 +106,16 @@ function ContentScript() {
 
       {/*---- CROP BOX ----- */}
       {isFabBtnActive &&
-        <CropBox port={port} ref={cropBoxRef} filledBoxStyle={filledBoxStyle} setFilledBoxStyle={setFilledBoxStyle} isFabBtnActive={isFabBtnActive}/>
+        <CropBox port={port} ref={cropBoxRef} filledBoxStyle={filledBoxStyle} setFilledBoxStyle={setFilledBoxStyle} isFabBtnActive={isFabBtnActive} />
       }
 
       {/* --- MODAL --- */}
       {portalModalData?.isOpen &&
         <PortalModal imageData={{ dataUri: portalModalData?.dataUri, coords: filledBoxStyle }}
-          closePortalModalHandler={closePortalModalHandler} />}
+          closePortalModalHandler={closePortalModalHandler} showToastMessage={showToastMessage} />}
+
+      {/* ---------------TOAST---------------- */}
+      <Toast toastMsg={toastMsg} setToastMsg={setToastMsg} />
     </>
   );
 }
