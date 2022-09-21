@@ -209,6 +209,7 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
             width: 80%; /* Could be more or less, depending on screen size */
             max-width:800px;
             border-radius:10px;
+            position: relative;
           }
           .modal-content header{
               margin-bottom:30px;
@@ -331,6 +332,45 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
         }
         .screenshot-wrapper::-webkit-scrollbar-thumb:hover {
             background: #000;
+        }
+        .loader-wrap{
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,.4);
+            display:none;
+            border-radius:10px;
+        }
+        .loader-wrap.is-active{
+            display:block;
+        }
+        .loader-wrap span {
+           width:45px;
+           height:45px;
+           top: 50%;
+           left: 50%;
+           transform: translate(-50%,-50%);
+           position: absolute;
+           display:inline-block;
+           padding:0px;
+           border-radius:100%;
+           border:5px solid;
+           border-top-color: rgba(255, 255, 255, 1);
+           border-bottom-color: rgba(255,255,255, 0.3);
+           border-left-color: rgba(255, 255, 255, 1);
+           border-right-color: rgba(255,255,255, 0.3);
+           -webkit-animation: loader4 1s ease-in-out infinite;
+           animation: spinner 1s ease-in-out infinite;
+        }
+        @keyframes spinner {
+           from {transform: rotate(0deg);}
+           to {transform: rotate(360deg);}
+        }
+        @-webkit-keyframes spinner {
+           from {-webkit-transform: rotate(0deg);}
+           to {-webkit-transform: rotate(360deg);}
         }`
             }
         </style>
@@ -339,6 +379,9 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
 
             {/* <!-- Modal content --> */}
             <div class="modal-content">
+                <div class="loader-wrap">
+                    <span></span>
+                </div>
                 {/* ---------------TOAST---------------- */}
                 <Toast toastMsg={toastMsg} setToastMsg={setToastMsg} />
 
