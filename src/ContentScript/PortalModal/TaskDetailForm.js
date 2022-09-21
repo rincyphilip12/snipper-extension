@@ -60,8 +60,9 @@ function TaskDetailForm({ pendingFileRef, projects, fetcher, showToastMessage })
             }
 
             const res = await fetcher(`tasks/${selectedTaskId?.current}.json`, 'POST', JSON.stringify(reqBody));
-            if (res?.STATUS === 'OK')
-                showToastMessage('Sub Task has been created succesfully')
+            if (res?.STATUS === 'OK'){
+                showToastMessage('Sub Task has been created succesfully',true)
+            }
             else if (res?.STATUS === 'Error')
                 throw new Error(res?.MESSAGE)
 
