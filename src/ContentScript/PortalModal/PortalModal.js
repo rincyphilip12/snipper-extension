@@ -338,7 +338,7 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler ,
             height: 100%;
             background: rgba(0,0,0,.4);
             display:none;
-            border-radius:10px;
+            border-radius:9px;
         }
         .loader-wrap.is-active{
             display:block;
