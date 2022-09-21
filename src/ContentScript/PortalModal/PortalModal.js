@@ -248,7 +248,7 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
             transform:scale(1.1);
           }
           .result-preview{
-            width:600px;
+            max-height:500px;
         }
         input,
         select{

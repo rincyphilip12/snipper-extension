@@ -125,7 +125,7 @@ function TaskDetailForm({ pendingFileRef, projects, fetcher }) {
                         <label htmlFor="">
                             <span>Priority</span>
                             <select onChange={priorityDropdownHandlr}>
-                                <option value='not set'>Not Set</option>
+                                <option value=''>Not Set</option>
                                 <option value='low'>Low</option>
                                 <option value='medium'>Medium</option>
                                 <option value='high'>High</option>
