@@ -7,21 +7,26 @@ function TaskDetailForm({ pendingFileRef, projects, fetcher }) {
     const selectedPriority = useRef();
     const contentRef = useRef();
     const descriptionRef = useRef();
+    const [taskListLoader, setTaskListLoader] = useState(false);
     // --------------- PROJECTS DROPDOWN HANDLR------------------
     const projectsDropdownChangeHandler = async (e) => {
         const id = e?.target?.value;
         if (!id)
             return;
         try {
+            setTaskLists([]);
+            setTaskListLoader(true);
             const payload = await fetcher(`projects/${id}/tasks.json`, 'GET');
 
             if (payload.STATUS == 'OK') {
                 selectedProjectId.current = id;
                 setTaskLists(payload['todo-items']);
+                setTaskListLoader(false);
             }
             else throw new Error('Error in project dropdown')
         }
         catch (e) {
+            setTaskListLoader(false);
             console.error(e);
         }
     }
@@ -40,7 +45,7 @@ function TaskDetailForm({ pendingFileRef, projects, fetcher }) {
 
     const createSubTaskHandler = async (e) => {
 
-        if (!(contentRef?.current?.value && descriptionRef?.current?.value && pendingFileRef?.current && selectedPriority?.current && selectedTaskId?.current)){
+        if (!(contentRef?.current?.value && descriptionRef?.current?.value && pendingFileRef?.current && selectedPriority?.current && selectedTaskId?.current)) {
             alert('Please enter complete details');
             return;
         }
@@ -85,7 +90,7 @@ function TaskDetailForm({ pendingFileRef, projects, fetcher }) {
                             </select>
                         </label>}
                     </div>
-                
+
 
                     {/* -------------- TASKS DROPDOWN ------------------- */}
                     <div className="l-col l-col--6">
@@ -101,6 +106,9 @@ function TaskDetailForm({ pendingFileRef, projects, fetcher }) {
                                             </option>
                                     )
                                 }
+                                {
+                                    taskListLoader && <option value=''>Loading...</option>
+                                }
                             </select>
                         </label>}
                     </div>
@@ -111,14 +119,14 @@ function TaskDetailForm({ pendingFileRef, projects, fetcher }) {
                 <div class="l-row">
                     <div class="l-col l-col--4">
                         <label htmlFor="">
-                            <span>Content</span> 
-                            <input type="text" ref={contentRef} /> 
+                            <span>Content</span>
+                            <input type="text" ref={contentRef} />
                         </label>
                     </div>
                     <div class="l-col l-col--4">
                         <label htmlFor="">
-                            <span>Description</span> 
-                            <input type="text" ref={descriptionRef} /> 
+                            <span>Description</span>
+                            <input type="text" ref={descriptionRef} />
                         </label>
                     </div>
                     <div class="l-col l-col--4">
@@ -133,8 +141,8 @@ function TaskDetailForm({ pendingFileRef, projects, fetcher }) {
                         </label>
                     </div>
                 </div>
-                
-                
+
+
 
                 <button class="l-btn l-btn--dark" type="button" onClick={createSubTaskHandler} >Create SubTask</button>
             </form></>

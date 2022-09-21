@@ -7,9 +7,9 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
     const previewImageCanvasRef = useRef(null);
     const [formActive, setFormActive] = useState(false);
     const [projects, setProjects] = useState([]);
-
     const pendingFileRef = useRef();
     const encodedToken = useRef();
+    
     // ------------------- INIT FUNCTION  - GETS SAVED CREDS-----------------------
     useEffect(() => {
         try {
@@ -347,6 +347,9 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler }
                 <div class="screenshot-wrapper">
                     <div class="screenshot__form">
                         {/* ------------ LOGIN -------------  */}
+                        {
+                            !formActive && <p>Loading.....</p>
+                        }
                         {
                             formActive === 'login' && <LoginForm submitLoginFormHandr={submitLoginFormHandr} />
                         }
