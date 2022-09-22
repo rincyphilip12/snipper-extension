@@ -388,27 +388,32 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler, 
 
             {/* <!-- Modal content --> */}
             <div className="modal-content">
+
+                {/* ---------- LOADER -------------- */}
                 <div className={`loader-wrap ${isLoaderOn ? 'is-active' : ''}`} >
                     <span></span>
                 </div>
-                {/* -------- HEADER ------- */}
+                {/* ---------- HEADER ------- */}
                 <header>
                     <h1 className="modal-header-text">PORTAL APP - WHITE RABBIT GROUP</h1>
                     <span className="close" onClick={closePortalModalHandler}>&times;</span>
                 </header>
                 <div className="screenshot-wrapper">
                     <div className="screenshot__form">
+
+                        {/* ------------- LOGIN ------------ */}
                         {
                             formActive === 'login' && <LoginForm submitLoginFormHandr={submitLoginFormHandr} showToastMessage={showToastMessage} />
                         }
 
+                        {/* ----------- DETAILS ---------- */}
                         {
                             formActive === 'details' && <TaskDetailForm
                                 pendingFileRef={pendingFileRef} projects={projects} fetcher={fetcher} showToastMessage={showToastMessage} showLoader={showLoader} />
 
                         }
-                        {/* ------------- IMAGE PREVIEW -------------- */}
                     </div>
+                    {/* ------------- IMAGE PREVIEW -------------- */}
                     <div className="screenshot__preview">
                         <h2 className="l-title l-title--sm">IMAGE PREVIEW</h2>
                         <canvas className="result-preview" id="preview-image" ref={previewImageCanvasRef} >
