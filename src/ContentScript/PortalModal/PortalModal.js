@@ -1,10 +1,11 @@
 import { useLayoutEffect, useRef, useEffect, useState } from "react";
 import LoginForm from "./LoginForm";
 import TaskDetailForm from './TaskDetailForm';
-function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler , showToastMessage}) {
+function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler, showToastMessage }) {
 
     const previewImageCanvasRef = useRef(null);
     const [formActive, setFormActive] = useState(false);
+    const [isLoaderOn, setIsLoaderOn] = useState(false);
     const [projects, setProjects] = useState([]);
     const pendingFileRef = useRef();
     const encodedToken = useRef();
@@ -13,6 +14,7 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler ,
     useEffect(() => {
         try {
             getStoredEncodedToken();
+
         }
         catch (e) {
             console.error(e)
@@ -45,25 +47,30 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler ,
     }
 
     // --------------GET PROJECTs LIST from API AND SHOW DETAILS FORM --------------
-    const getProjects = async () => {
+    const getProjects = async (firstTimeLoginCreds) => {
         try {
+            showLoader(true);
             const res = await fetcher("projects.json", 'GET');
             if (res?.STATUS === 'OK') {
                 setFormActive('details');
+                showLoader(false);
                 setProjects(res?.projects || []);
                 uploadScreenshot();
+                if (firstTimeLoginCreds) // saves userid password of first time login users
+                    await navigator.credentials.store(firstTimeLoginCreds);
             }
             else
                 throw new Error('get projects failed')
         }
         catch (e) {
-            console.error('incorrect username password')
+            showLoader(false);
+            showToastMessage('Incorrect Credentials')
         }
     }
 
 
     // ----------------- SUBMIT LOGIN INFO ----------------------------------
-    // u
+
     const submitLoginFormHandr = async (username, pwd) => {
         try {
             if (window.PasswordCredential || window.FederatedCredential) {
@@ -74,16 +81,13 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler ,
                     showToastMessage('Enter the credentials')
                     return
                 }
-
                 const creds = new window.PasswordCredential({
                     id: username,
                     password: pwd,
                     name: username
                 });
 
-                const res = await navigator.credentials.store(creds);
-
-                getProjects();
+                getProjects(creds);
             }
         }
         catch (e) {
@@ -93,6 +97,7 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler ,
 
     // ------------------- GET STORED ENCODED TOKEN ------------
     const getStoredEncodedToken = async () => {
+        showLoader(true);
         try {
             const userCreds = await navigator.credentials.get({
                 password: true,
@@ -109,13 +114,14 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler ,
                 getProjects();
             }
             else {
-                setFormActive('login');
+
                 throw new Error('credentials retrieving failed')
             }
         }
         catch (e) {
-            console.error(e)
-            setFormActive('login')
+            console.log(e)
+            setFormActive('login');
+            showLoader(false);
         }
 
     }
@@ -130,7 +136,7 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler ,
                 const res = await fetcher(`pendingfiles.json`, 'POST', formData);
                 if (res?.pendingFile)
                     pendingFileRef.current = res.pendingFile?.ref;
-                else throw new Error(res.STATUS)
+                else throw new Error(res?.STATUS)
             }, 'image/jpeg');
 
         }
@@ -176,6 +182,10 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler ,
         }
     }
 
+
+    const showLoader = (status) => {
+        setIsLoaderOn(status);
+    }
     return (<>
         <style>
             {` /* The Modal (background) */
@@ -374,39 +384,33 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler ,
 
 
 
-        <div id="portalModal" class="modal" >
+        <div id="portalModal" className="modal" >
 
             {/* <!-- Modal content --> */}
-            <div class="modal-content">
-                <div class="loader-wrap">
+            <div className="modal-content">
+                <div className={`loader-wrap ${isLoaderOn ? 'is-active' : ''}`} >
                     <span></span>
                 </div>
                 {/* -------- HEADER ------- */}
                 <header>
-                    <h1 class="modal-header-text">PORTAL APP - WHITE RABBIT GROUP</h1>
-                    <span class="close" onClick={closePortalModalHandler}>&times;</span>
+                    <h1 className="modal-header-text">PORTAL APP - WHITE RABBIT GROUP</h1>
+                    <span className="close" onClick={closePortalModalHandler}>&times;</span>
                 </header>
-                <div class="screenshot-wrapper">
-                    <div class="screenshot__form">
-
-
-                        {/* ------------ LOGIN -------------  */}
-                        {
-                            !formActive && <p>Loading.....</p>
-                        }
+                <div className="screenshot-wrapper">
+                    <div className="screenshot__form">
                         {
                             formActive === 'login' && <LoginForm submitLoginFormHandr={submitLoginFormHandr} showToastMessage={showToastMessage} />
                         }
 
                         {
                             formActive === 'details' && <TaskDetailForm
-                                pendingFileRef={pendingFileRef} projects={projects} fetcher={fetcher} showToastMessage={showToastMessage} />
+                                pendingFileRef={pendingFileRef} projects={projects} fetcher={fetcher} showToastMessage={showToastMessage} showLoader={showLoader} />
 
                         }
                         {/* ------------- IMAGE PREVIEW -------------- */}
                     </div>
-                    <div class="screenshot__preview">
-                        <h2 class="l-title l-title--sm">IMAGE PREVIEW</h2>
+                    <div className="screenshot__preview">
+                        <h2 className="l-title l-title--sm">IMAGE PREVIEW</h2>
                         <canvas className="result-preview" id="preview-image" ref={previewImageCanvasRef} >
                         </canvas>
                     </div>

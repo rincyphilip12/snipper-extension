@@ -25,7 +25,8 @@ const Toast = ({ toastMsg, setToastMsg }) => {
                         font-size: 14px;
                         box-sizing: border-box;
                         position: fixed;
-                        z-index: 999999999
+                        z-index: 999999999;
+                        font-family: "Roboto", sans-serif;
                     }
 
                     .top-right {
