@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-function TaskDetailForm({ pendingFileRef, projects, fetcher, showToastMessage,showLoader }) {
+function TaskDetailForm({ pendingFileRef, projects, fetcher, showToastMessage, showLoader }) {
 
     const [taskList, setTaskLists] = useState([]);
     const selectedTaskId = useRef();
@@ -8,6 +8,7 @@ function TaskDetailForm({ pendingFileRef, projects, fetcher, showToastMessage,sh
     const contentRef = useRef();
     const descriptionRef = useRef();
     const [taskListLoader, setTaskListLoader] = useState(false);
+
     // --------------- PROJECTS DROPDOWN HANDLR------------------
     const projectsDropdownChangeHandler = async (e) => {
         const id = e?.target?.value;
@@ -38,7 +39,7 @@ function TaskDetailForm({ pendingFileRef, projects, fetcher, showToastMessage,sh
 
     // ------------- PRIORITY HANDLR---------------
     const priorityDropdownHandlr = (e) => {
-        selectedPriority.current = e?.target?.value || '';
+        selectedPriority.current = e?.target?.value;
     }
 
     // ------------- CREATE SUB TASK HANDLER ------------
@@ -52,25 +53,25 @@ function TaskDetailForm({ pendingFileRef, projects, fetcher, showToastMessage,sh
         try {
             const reqBody = {
                 'todo-item': {
-                    'content': contentRef?.current?.value || '',
-                    'description': descriptionRef?.current?.value || '',
-                    'pendingFileAttachments': pendingFileRef?.current || '',
-                    'priority': selectedPriority?.current || 'not set'
+                    'content': contentRef?.current?.value,
+                    'description': descriptionRef?.current?.value,
+                    'pendingFileAttachments': pendingFileRef?.current,
+                    'priority': selectedPriority?.current
                 }
             }
 
             showLoader(true);
             const res = await fetcher(`tasks/${selectedTaskId?.current}.json`, 'POST', JSON.stringify(reqBody));
-            if (res?.STATUS === 'OK'){
+            if (res?.STATUS === 'OK') {
                 showLoader(false)
-                showToastMessage('Sub Task has been created succesfully',true)
+                showToastMessage('Subtask has been created succesfully',true)
             }
             else if (res?.STATUS === 'Error')
                 throw new Error(res?.MESSAGE)
 
         } catch (e) {
             showLoader(false)
-            showToastMessage('Error in sub task creation')
+            showToastMessage('Error in subtask creation')
             console.log(e)
         }
     }
@@ -149,7 +150,7 @@ function TaskDetailForm({ pendingFileRef, projects, fetcher, showToastMessage,sh
 
 
 
-                <button class="l-btn l-btn--dark" type="button" onClick={createSubTaskHandler} >Create SubTask</button>
+                <button class="l-btn l-btn--dark" type="button" onClick={createSubTaskHandler} >Create Subtask</button>
             </form></>
     )
 }

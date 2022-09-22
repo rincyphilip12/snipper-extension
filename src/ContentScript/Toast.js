@@ -1,4 +1,4 @@
-import { useCallback , useEffect} from 'react'
+import { useCallback, useEffect } from 'react'
 
 const Toast = ({ toastMsg, setToastMsg }) => {
 
@@ -124,22 +124,15 @@ const Toast = ({ toastMsg, setToastMsg }) => {
             <div className="notification-container top-right">
                 {
                     toastMsg &&
-                    <div
-
-                        className="notification toast top-right"
-                      
-                    >
+                    <div className="notification toast top-right" >
                         <button onClick={() => deleteToast()}>X</button>
                         <div>
                             <p className="notification-title">Notification</p>
-                            {/* <p className={styles.title}>{toast.title}</p> */}
                             <p className="notification-message">{toastMsg}</p>
                         </div>
                     </div>
-
                 }
             </div>
-
         </>
     )
 }

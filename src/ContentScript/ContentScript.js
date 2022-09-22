@@ -1,5 +1,5 @@
 /*global chrome*/
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import CropBox from "./CropBox";
 import PortalModal from "./PortalModal/PortalModal";
 import Toast from "./Toast";
@@ -12,13 +12,15 @@ function ContentScript() {
   const [portalModalData, setPortalModalData] = useState({});
   const [filledBoxStyle, setFilledBoxStyle] = useState({});
   const [toastMsg, setToastMsg] = useState('');
-
   const cropBoxRef = useRef();
 
   // ----------------------- SHOW TOAST MESSAGE ----------- 
   const showToastMessage = (msg, closeModal) => {
     setToastMsg(msg);
+    if (closeModal)
+      setTimeout(() => closePortalModalHandler(), 2000);
   }
+
   // --------  PORT -------- 
   let port = chrome.runtime.connect({ name: "FAB_BTN_PORT" });
 
