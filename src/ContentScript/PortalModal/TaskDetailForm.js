@@ -81,61 +81,58 @@ function TaskDetailForm({ pendingFileRef, projects, fetcher, showToastMessage, s
             <form action="">
 
                 {/* -------------- PROJECTS DROPDOWN ------------------- */}
-                <div className="l-row">
-                    <div className="l-col l-col--6">
-                        {projects[0] && <label htmlFor="">
-                            <span>Projects </span>
-                            <select onChange={projectsDropdownChangeHandler} >
-                                <option value=''>-- SELECT A PROJECT --</option>
-                                {projects.map(
-                                    project =>
-                                        <option key={project.id} value={project.id}>
-                                            {project.name}
+                <div className="l-col">
+                    {projects[0] && <label htmlFor="">
+                        <span>Projects </span>
+                        <select onChange={projectsDropdownChangeHandler} >
+                            <option value=''>-- SELECT A PROJECT --</option>
+                            {projects.map(
+                                project =>
+                                    <option key={project.id} value={project.id}>
+                                        {project.name}
+                                    </option>
+                            )}
+                        </select>
+                    </label>}
+                </div>
+
+
+                {/* -------------- TASKS DROPDOWN ------------------- */}
+                <div className="l-col">
+                    {<label htmlFor="">
+                        <span>Tasks</span>
+                        <select onChange={tasksDropdownChangeHandler}>
+                            <option value=''>-- SELECT A TASK --</option>
+                            {taskList[0] &&
+                                taskList.map(
+                                    task =>
+                                        <option key={task.id} value={task.id}>
+                                            {task.content}
                                         </option>
-                                )}
-                            </select>
-                        </label>}
-                    </div>
-
-
-                    {/* -------------- TASKS DROPDOWN ------------------- */}
-                    <div className="l-col l-col--6">
-                        {<label htmlFor="">
-                            <span>Tasks</span>
-                            <select onChange={tasksDropdownChangeHandler}>
-                                <option value=''>-- SELECT A TASK --</option>
-                                {taskList[0] &&
-                                    taskList.map(
-                                        task =>
-                                            <option key={task.id} value={task.id}>
-                                                {task.content}
-                                            </option>
-                                    )
-                                }
-                                {
-                                    taskListLoader && <option value=''>Loading...</option>
-                                }
-                            </select>
-                        </label>}
-                    </div>
+                                )
+                            }
+                            {
+                                taskListLoader && <option value=''>Loading...</option>
+                            }
+                        </select>
+                    </label>}
                 </div>
 
                 {/* ----------- SUB TASK CREATION FORM---------------- */}
-                <h2 class="l-title l-title--sm">CREATE A SUB TASKS</h2>
-                <div class="l-row">
-                    <div class="l-col l-col--4">
+                <h2 class="l-title l-title--xs">Create a sub tasks</h2>
+                    <div class="l-col">
                         <label htmlFor="">
                             <span>Content</span>
                             <input type="text" ref={contentRef} />
                         </label>
                     </div>
-                    <div class="l-col l-col--4">
+                    <div class="l-col">
                         <label htmlFor="">
                             <span>Description</span>
                             <input type="text" ref={descriptionRef} />
                         </label>
                     </div>
-                    <div class="l-col l-col--4">
+                    <div class="l-col">
                         <label htmlFor="">
                             <span>Priority</span>
                             <select onChange={priorityDropdownHandlr}>
@@ -146,7 +143,6 @@ function TaskDetailForm({ pendingFileRef, projects, fetcher, showToastMessage, s
                             </select>
                         </label>
                     </div>
-                </div>
 
 
 
