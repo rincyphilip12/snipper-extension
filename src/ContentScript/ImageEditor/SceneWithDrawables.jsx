@@ -37,6 +37,7 @@ function SceneWithDrawables({ uploadScreenshot, dataUri, coords }) {
 
     // ------------------ MOUSE UP --------------
     const handleMouseUp = e => {
+        console.log(e)
         if (newDrawable.length === 1) {
             const { x, y } = e.target.getStage().getPointerPosition();
             const drawableToAdd = newDrawable[0];
