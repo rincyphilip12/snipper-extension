@@ -1,0 +1,35 @@
+{
+  "name": "Portal Snapper",
+  "description": "Take Snapshots for Portal",
+  "version": "1.0",
+  "manifest_version": 3,
+  "action": {
+    "default_icon": {             
+      "16": "logo192.png",   
+      "24": "logo192.png",   
+      "32": "logo192.png"    
+    },
+    "default_title": "Click Me",   
+    "default_popup": "popup.html"  
+  },
+  "icons": {
+    "16": "logo192.png",
+    "48": "logo192.png",
+    "128": "logo192.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["static/js/content.js"]
+    }
+  ],
+  "web_accessible_resources": [{
+    "resources": ["static/media/icon-a.svg","static/media/icon-b.svg","static/media/icon-c.svg","static/media/icon-d.svg"],
+    "matches": ["<all_urls>"]
+  }],
+  "permissions": ["tabs", "activeTab","storage"]
+  
+}
