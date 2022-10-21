@@ -27,6 +27,10 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       login(sendResponse);
       return true;
 
+    case "LOGOUT":
+      logout(sendResponse);
+      return true;
+
     case "CAPTURE_SCREENSHOT":
       captureScreenshot(sendResponse);
       return true;
@@ -59,11 +63,23 @@ function generateAuthReq(code) {
 function captureScreenshot(sendResponse) {
 
   chrome.tabs.captureVisibleTab(null, {}, function (dataUri) {
-    console.log('screeennnssshiititt')
     sendResponse({ cmd: 'SENDING_DATA_URI', dataUri });
   });
 }
 
+
+// ----------- LOGOUT METHOD ------- 
+function logout(sendResponse) {
+  chrome.storage.local.clear(function () {
+    var error = chrome.runtime.lastError;
+    if (error) {
+      sendResponse({loggedOut:false})
+      console.error(error);
+    }
+    sendResponse({loggedOut:true})
+    // do something more
+  });
+}
 // ----------- LOGIN METHOD -------
 function login(sendResponse) {
   try {
@@ -114,7 +130,7 @@ const fetcher = (url, method, body, headers, isAbsolute, withoutAuth, sendRespon
 
   chrome.storage.local.get(['token'], function (result) {
     let token = result.token;
-    
+
     if (!token) {// Check if token is available
       console.log('Token is invalid', url)
       return;

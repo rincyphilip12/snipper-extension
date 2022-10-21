@@ -8,14 +8,14 @@ function Popup() {
   const toggleRef = useRef(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const tab = useRef();
-    useEffect(
+  useEffect(
     () => {
       chrome.runtime.sendMessage({ cmd: 'IS_LOGGEDIN' }, response => {
         setIsLoggedIn(response);
       });
 
       chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-         tab.current = tabs[0].id;
+        tab.current = tabs[0].id;
       });
     }, []
   )
@@ -40,6 +40,15 @@ function Popup() {
     })
   }
 
+
+  // ----------- ON LOGOUT ------ 
+  const onLogoutHandler = () => {
+    chrome.runtime.sendMessage({ cmd: "LOGOUT" }, response => {
+      console.log('logot')
+      console.log(response)
+      setIsLoggedIn(!response.loggedOut)
+    })
+  }
   // ----------------- RENDER METHOD ----------------------
   return (
     <div className="App">
@@ -115,10 +124,13 @@ function Popup() {
         {!isLoggedIn && <button type="button" onClick={onLoginHandler}>Login</button>}
 
         {/* <!-- Rounded switch --> */}
-        {isLoggedIn && <label className="switch">
-          <input type="checkbox" ref={toggleRef} onClick={toggleSwitchHandler} />
-          <span className="slider round"></span>
-        </label>}
+        {isLoggedIn && <>
+          <label className="switch">
+            <input type="checkbox" ref={toggleRef} onClick={toggleSwitchHandler} />
+            <span className="slider round"></span>
+          </label>
+          <button type="button" onClick={onLogoutHandler}>Logout</button></>
+        }
 
       </main>
     </div>
