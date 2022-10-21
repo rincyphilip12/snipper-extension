@@ -11,7 +11,7 @@ const Toast = ({ toastMsg, setToastMsg }) => {
             if (toastMsg) {
                 deleteToast(toastMsg);
             }
-        }, 2000);
+        }, 3000);
 
         return () => {
             clearInterval(interval);

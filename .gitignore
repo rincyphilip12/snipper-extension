@@ -48,4 +48,9 @@ Thumbs.db
 *.mov
 *.wmv
 
+<<<<<<< HEAD
 build/
+=======
+build/*                   
+
+>>>>>>> refactored

@@ -18,8 +18,8 @@ function ContentScript() {
     chrome.runtime.onMessage.addListener(
       function (payload, sender, sendResponse) {
         if (payload.cmd == "POPUP_SWITCH_STATUS") {
-            setIsFabBtnVisible(payload.popupSwitchStatus === 'on');
-            sendResponse(true);
+          setIsFabBtnVisible(payload.popupSwitchStatus === 'on');
+          sendResponse(true);
         }
       }
     );
@@ -82,7 +82,7 @@ function ContentScript() {
               font-size:24px;
               font-weight:800;
               background:black;
-             
+              cursor:pointer;
           }
           .fab.on-mode{
             background:white;
@@ -109,9 +109,9 @@ function ContentScript() {
       {/* --- MODAL --- */}
       {portalModalData?.isOpen &&
         <PortalModal imageData={{ dataUri: portalModalData?.dataUri, coords: filledBoxStyle }}
-          closePortalModalHandler={closePortalModalHandler}  showToastMessage={showToastMessage} />}
+          closePortalModalHandler={closePortalModalHandler} showToastMessage={showToastMessage} />}
 
-                {/* ---------------TOAST---------------- */}
+      {/* ---------------TOAST---------------- */}
       <Toast toastMsg={toastMsg} setToastMsg={setToastMsg} />
     </>
   );

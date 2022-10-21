@@ -94,23 +94,40 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler, 
             padding: 20px;
             border: 1px solid #888;
             width: 80%; /* Could be more or less, depending on screen size */
-            max-width:800px;
+            max-width:1080px;
             border-radius:10px;
             position: relative;
           }
           .modal-content header{
-              margin-bottom:30px;
+              padding-bottom:26px;
               position:relative
+          }
+          .modal-content header:after{
+              content:'';
+              position:absolute;
+              left:50%;
+              transform: translateX(-50%);
+              bottom:0;
+              width:calc(100% + 40px);
+              height:1px;
+              background:rgba(0,0,0,0.12);
           }
           .modal-header-text{
               display:block;
-              text-align:center;
-              font-size:26px;
+              font-size:20px;
+              line-height:32px;
           }
           .screenshot-wrapper{
             max-height: 80vh;
             overflow-y: auto;
-            overflow-x: auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-wrap: wrap;
+            padding-top:20px;
+          }
+          .screenshot__form{
+            flex-basis: 40%;
+            padding-right:40px;
           }
 
           #preview-image{
@@ -121,10 +138,9 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler, 
           .close {
             color: #343434;
             position:absolute;
-            top:0;
+            top:10px;
             right:0;
-            font-size: 28px;
-            font-weight: bold;
+            display:flex;
             transition:0.3s ease-in-out
           }
 
@@ -139,13 +155,18 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler, 
             max-height:500px;
         }
         input,
-        select{
+        select,
+        textarea{
             height:32px;
             padding: 0 5px;
             color: #333;
             border:1px solid #cfcfcf;
             border-radius: 3px;
             width:100%;
+        }
+        textarea{
+            height:96px;
+            resize:none;
         }
         *{
             box-sizing:border-box;
@@ -158,9 +179,12 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler, 
         .l-title{
             margin-bottom:20px;
         }
-        .l-title--sm{
-            font-size:18px;
+        .l-title--xs{
+            font-size:14px;
+            line-height:20px;
             margin-bottom:10px;
+            font-weight:400;
+            color:#333333;
         }
         .l-btn{
             background: #343434;
@@ -188,7 +212,7 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler, 
             padding: 0 10px;
         }
         .l-col{
-            margin-bottom:20px;
+            margin-bottom:24px;
         }
         .l-col--3{
             flex-basis:25%;
@@ -201,12 +225,20 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler, 
         }
         label span{
             display:inline-block;
-            margin-bottom:5px;
-            color:#343434;
+            margin-bottom:6px;
+            color:#555555;
+            font-size:13px;
+            line-height:19px;
         }
         .screenshot__preview{
-            margin-top:30px;
-            text-align:center;
+            flex-basis: 60%;
+        }
+        .screenshot__preview .l-title{
+            font-size: 13px;
+            line-height:19px;
+            color: #555555;
+            margin-bottom:6px;
+            font-weight:400;
         }
         .screenshot-wrapper::-webkit-scrollbar {
             width: 8px;
@@ -273,8 +305,13 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler, 
                 </div>
                 {/* ---------- HEADER ------- */}
                 <header>
-                    <h1 className="modal-header-text">PORTAL APP - WHITE RABBIT GROUP</h1>
-                    <span className="close" onClick={closePortalModalHandler}>&times;</span>
+                    <h1 className="modal-header-text">Portal App - White Rabbit Group</h1>
+                    <span className="close" onClick={closePortalModalHandler}>
+                        <svg width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M7.03125 5L10.25 1.8125L10.9062 1.15625C11 1.0625 11 0.90625 10.9062 0.78125L10.2188 0.09375C10.0938 0 9.9375 0 9.8438 0.09375L6 3.96875L2.125 0.09375C2.03125 0 1.875 0 1.75 0.09375L1.0625 0.78125C0.96875 0.90625 0.96875 1.0625 1.0625 1.15625L4.9375 5L1.0625 8.875C0.96875 8.9688 0.96875 9.125 1.0625 9.25L1.75 9.9375C1.875 10.0312 2.03125 10.0312 2.125 9.9375L6 6.0625L9.1875 9.2812L9.8438 9.9375C9.9375 10.0312 10.0938 10.0312 10.2188 9.9375L10.9062 9.25C11 9.125 11 8.9688 10.9062 8.875L7.03125 5Z" fill="#0B0E1F" />
+                        </svg>
+
+                    </span>
                 </header>
                 <div className="screenshot-wrapper">
                     <div className="screenshot__form">

@@ -1,0 +1,15 @@
+{
+  "files": {
+    "popup.js": "/static/js/popup.js",
+    "content.js": "/static/js/content.js",
+    "static/js/787.js": "/static/js/787.js",
+    "static/media/tick.svg": "/static/media/tick.svg",
+    "popup.html": "/popup.html",
+    "popup.js.map": "/static/js/popup.js.map",
+    "content.js.map": "/static/js/content.js.map",
+    "787.js.map": "/static/js/787.js.map"
+  },
+  "entrypoints": [
+    "static/js/popup.js"
+  ]
+}

@@ -76,7 +76,6 @@ function login(sendResponse) {
           throw new Error('signin error')
         }
 
-        console.log(">>>>", generateAuthReq(code))
         fetch('https://www.teamwork.com/launchpad/v1/token.json', {
           method: 'POST',
           headers: {
