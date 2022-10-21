@@ -1,15 +1,13 @@
 // /*global chrome*/
 
-// let token;
+
 let user;
-// let bgToCsPort;
+
 // ----------- CONFIG ----------
 const config = {
   clientId: 'e59f0650bd3e4982896923830e670dd2de933221',
   clientSecret: "dc75f6a7f8a271a3fe950f6609e3019136549268"
 }
-
-
 
 //  ONE TIME CONNECTION
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
@@ -17,9 +15,11 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
   switch (request.cmd) {
     case "IS_LOGGEDIN":
-      chrome.storage.local.get(['token'], function (result) {
+      chrome.storage.local.get(null, function (result) {
         console.log('Value currently is ' + result.token);
-        sendResponse(!!result.token);
+        console.log('Value currently is ' + result.userData);
+
+        sendResponse({loggedIn : !!result.token, userData : result.userData});
       });
       return true;
 
@@ -80,6 +80,7 @@ function logout(sendResponse) {
     // do something more
   });
 }
+
 // ----------- LOGIN METHOD -------
 function login(sendResponse) {
   try {
@@ -102,14 +103,11 @@ function login(sendResponse) {
         }).then(res => res.json()
         ).then(data => {
           // 3. STORE ACCESS TOKEN
-          const token = data.access_token;
 
-          chrome.storage.local.set({ token: token }, function () {
+          chrome.storage.local.set({ token: data.access_token , userData : data.user }, function () {
             console.log('Value is set to ' + value);
           });
-          user = data.user;
-          console.log(data)
-          sendResponse({ loggedIn: true });
+          sendResponse({ loggedIn: true , userData : data.user });
         })
       }
       else {

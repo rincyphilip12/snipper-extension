@@ -1,17 +1,19 @@
 /*global chrome*/
 
-import "./Popup.css";
 import { useEffect, useRef, useState } from "react";
 
 function Popup() {
 
   const toggleRef = useRef(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userData, setUserData] = useState(null)
+
   const tab = useRef();
   useEffect(
     () => {
       chrome.runtime.sendMessage({ cmd: 'IS_LOGGEDIN' }, response => {
-        setIsLoggedIn(response);
+        setIsLoggedIn(response.loggedIn);
+        setUserData(response.userData);
       });
 
       chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
@@ -36,7 +38,8 @@ function Popup() {
   // ------------ ON LOGIN -------- 
   const onLoginHandler = () => {
     chrome.runtime.sendMessage({ cmd: "LOGIN" }, response => {
-      setIsLoggedIn(response.loggedIn)
+      setIsLoggedIn(response.loggedIn);
+      setUserData(response.userData);
     })
   }
 
@@ -55,6 +58,24 @@ function Popup() {
 
       <style>
         {`
+
+        .App {
+          text-align: center;
+          height: 100%;
+          width: 300px;
+        }
+
+        .App-header {
+          background-color: #282c34;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          font-size: calc(10px + 2vmin);
+          color: white;
+        }
+
         /* The switch - the box around the slider */
         .switch {
           position: relative;
@@ -121,10 +142,13 @@ function Popup() {
       <main className="App-header">
         <h1>PORTAL SNAPPER</h1>
 
-        {!isLoggedIn && <button type="button" onClick={onLoginHandler}>Login</button>}
+        {!isLoggedIn &&
+          <button type="button" onClick={onLoginHandler}>Login</button>
+        }
 
         {/* <!-- Rounded switch --> */}
         {isLoggedIn && <>
+          { userData && <div>Welcome {userData.firstName} {userData.lastName}</div>}
           <label className="switch">
             <input type="checkbox" ref={toggleRef} onClick={toggleSwitchHandler} />
             <span className="slider round"></span>
