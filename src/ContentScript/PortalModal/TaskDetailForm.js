@@ -1,3 +1,5 @@
+/* global chrome */
+
 import { useRef, useState } from 'react';
 function TaskDetailForm({ pendingFileRef, projects, fetcher, showToastMessage, showLoader }) {
 
@@ -17,14 +19,15 @@ function TaskDetailForm({ pendingFileRef, projects, fetcher, showToastMessage, s
         try {
             setTaskLists([]);
             setTaskListLoader(true);
-            const payload = await fetcher(`projects/${id}/tasks.json`, 'GET');
 
-            if (payload.STATUS == 'OK') {
-                selectedProjectId.current = id;
-                setTaskLists(payload['todo-items']);
-                setTaskListLoader(false);
-            }
-            else throw new Error('Error in project dropdown')
+            chrome.runtime.sendMessage({ cmd: 'FETCH', url: `projects/${id}/tasks.json`, method: 'GET' }, res => {
+                if (res.STATUS == 'OK') {
+                    selectedProjectId.current = id;
+                    setTaskLists(res['todo-items']);
+                    setTaskListLoader(false);
+                }
+                else throw new Error('Error in project dropdown')
+            });
         }
         catch (e) {
             setTaskListLoader(false);
@@ -61,13 +64,16 @@ function TaskDetailForm({ pendingFileRef, projects, fetcher, showToastMessage, s
             }
 
             showLoader(true);
-            const res = await fetcher(`tasks/${selectedTaskId?.current}.json`, 'POST', JSON.stringify(reqBody));
-            if (res?.STATUS === 'OK') {
-                showLoader(false)
-                showToastMessage('Subtask has been created succesfully',true)
-            }
-            else if (res?.STATUS === 'Error')
-                throw new Error(res?.MESSAGE)
+
+            chrome.runtime.sendMessage({ cmd: 'FETCH', url: `tasks/${selectedTaskId?.current}.json`, method: 'POST', body: JSON.stringify(reqBody) }, res => {
+
+                if (res?.STATUS === 'OK') {
+                    showLoader(false)
+                    showToastMessage('Subtask has been created succesfully', true)
+                }
+                else if (res?.STATUS === 'Error')
+                    throw new Error(res?.MESSAGE)
+            });
 
         } catch (e) {
             showLoader(false)

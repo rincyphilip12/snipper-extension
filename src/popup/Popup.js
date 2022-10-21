@@ -1,27 +1,44 @@
 /*global chrome*/
 
 import "./Popup.css";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function Popup() {
 
   const toggleRef = useRef(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const tab = useRef();
+    useEffect(
+    () => {
+      chrome.runtime.sendMessage({ cmd: 'IS_LOGGEDIN' }, response => {
+        setIsLoggedIn(response);
+      });
+
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+         tab.current = tabs[0].id;
+      });
+    }, []
+  )
 
   // ------------- SWITCH ON / OFF NOTIFIER TO CONTENT SCRIPT --------------- 
   const toggleSwitchHandler = () => {
     const msg = {
-      msg: 'POPUP_SWITCH_STATUS',
+      cmd: 'POPUP_SWITCH_STATUS',
       popupSwitchStatus: toggleRef.current.checked ? 'on' : 'off'
     }
 
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      const tab = tabs[0].id;
-      chrome.tabs.sendMessage(tab, msg, function (response) {
-        console.log(response);
-      });
+    chrome.tabs.sendMessage(tab.current, msg, function (response) {
+      console.log(response);
     });
+
   }
 
+  // ------------ ON LOGIN -------- 
+  const onLoginHandler = () => {
+    chrome.runtime.sendMessage({ cmd: "LOGIN" }, response => {
+      setIsLoggedIn(response.loggedIn)
+    })
+  }
 
   // ----------------- RENDER METHOD ----------------------
   return (
@@ -95,11 +112,13 @@ function Popup() {
       <main className="App-header">
         <h1>PORTAL SNAPPER</h1>
 
+        {!isLoggedIn && <button type="button" onClick={onLoginHandler}>Login</button>}
+
         {/* <!-- Rounded switch --> */}
-        <label className="switch">
+        {isLoggedIn && <label className="switch">
           <input type="checkbox" ref={toggleRef} onClick={toggleSwitchHandler} />
           <span className="slider round"></span>
-        </label>
+        </label>}
 
       </main>
     </div>

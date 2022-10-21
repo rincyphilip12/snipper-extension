@@ -1,7 +1,9 @@
+/* global chrome */
+
 import { useImperativeHandle } from 'react';
 import { ReactComponent as TickSVG } from './tick.svg';
 import { useState, useRef ,forwardRef,useEffect} from 'react';
-const CropBox = forwardRef(({ port, filledBoxStyle, setFilledBoxStyle ,isFabBtnActive}, ref) => {
+const CropBox = forwardRef(({ snapshotCaptureHandler, filledBoxStyle, setFilledBoxStyle ,isFabBtnActive}, ref) => {
 
     const filledBoxRef = useRef();
     const containerRef = useRef();
@@ -82,12 +84,6 @@ const CropBox = forwardRef(({ port, filledBoxStyle, setFilledBoxStyle ,isFabBtnA
             reCalc();
         }
     }
-
-    // ------------- CALLED AFTER SNAPSHOT IS TAKEN --------
-    const snapshotCaptureHandler = () => {
-        port.postMessage({ msg: 'SCREENSHOT_CAPTURED' });
-    }
-
 
     return (<>
         <style>

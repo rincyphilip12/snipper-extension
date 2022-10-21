@@ -1,68 +1,34 @@
-import {  useRef, useEffect, useState } from "react";
+/* global chrome*/
+
+import { useRef, useEffect, useState } from "react";
 import CustomImageEditor from "../ImageEditor/CustomImageEditor";
-import LoginForm from "./LoginForm";
+// import LoginForm from "./LoginForm";
 import TaskDetailForm from './TaskDetailForm';
 
 function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler, showToastMessage }) {
 
-    const [formActive, setFormActive] = useState(false);
     const [isLoaderOn, setIsLoaderOn] = useState(false);
-    const [projects, setProjects] = useState([]); 
+    const [projects, setProjects] = useState([]);
     // const [previewImgDataURL, setPreviewImgDataURL] = useState(null)
     const pendingFileRef = useRef();
-    const encodedToken = useRef();
-    // ------------------- INIT FUNCTION  - GETS SAVED CREDS-----------------------
+
     useEffect(() => {
-        try {
-            getStoredEncodedToken();
-        }
-        catch (e) {
-            console.error(e)
-        }
-    }, []);
-
-
-    // ----------------- IMAGE CREATION FROM CO-ORDINATES ----------------------------------
-    // useLayoutEffect(() => {
-    //     try {
-    //         processDataURItoImage();
-    //     }
-    //     catch (e) {
-    //         console.error(e)
-    //     }
-    // });
-
-    // ----------------- PROCESS DATA URI TO IMAGE -------------------
-    // const processDataURItoImage = () => {
-    //     var img = new Image();
-    //     img.src = dataUri;
-    //     img.onload = function () {
-    //         const aspectRatioY = img.height / coords.screenHeight;
-    //         const aspectRatioX = img.width / coords.screenWidth;
-    //         let canvasElt = document.createElement('canvas')
-    //         fWidth = canvasElt.width = coords.width * aspectRatioX;
-    //         fHeight = canvasElt.height = coords.height * aspectRatioY;
-    //         const context = canvasElt.getContext('2d');
-    //         context.drawImage(img, coords.left * aspectRatioX + 2, coords.top * aspectRatioY + 2, coords.width * aspectRatioX, coords.height * aspectRatioY, 0, 0, canvasElt.width, canvasElt.height);
-    //         setPreviewImgDataURL(canvasElt.toDataURL());
-    //     };
-    // }
+        getProjects();
+    }, [])
 
     // --------------GET PROJECTs LIST from API AND SHOW DETAILS FORM --------------
-    const getProjects = async (firstTimeLoginCreds) => {
+    const getProjects = async () => {
         try {
             showLoader(true);
-            const res = await fetcher("projects.json", 'GET');
-            if (res?.STATUS === 'OK') {
-                setFormActive('details');
-                showLoader(false);
-                setProjects(res?.projects || []);
-                // uploadScreenshot();
-                if (firstTimeLoginCreds) // saves userid password of first time login users
-                    await navigator.credentials.store(firstTimeLoginCreds);
-            }
-            else
-                throw new Error('get projects failed')
+            chrome.runtime.sendMessage({ cmd: 'FETCH', url: "projects.json", method: 'GET' }, res => {
+                if (res?.STATUS === 'OK') {
+                    showLoader(false);
+                    setProjects(res?.projects || []);
+                    // uploadScreenshot();
+                }
+                else
+                    throw new Error('get projects failed')
+            });
         }
         catch (e) {
             showLoader(false);
@@ -71,113 +37,25 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler, 
     }
 
 
-    // ----------------- SUBMIT LOGIN INFO ----------------------------------
 
-    const submitLoginFormHandr = async (username, pwd) => {
-        try {
-            if (window.PasswordCredential || window.FederatedCredential) {
-
-                if (username && pwd)
-                    encodedToken.current = (btoa(`${username}:${pwd}`));
-                else {
-                    showToastMessage('Enter the credentials')
-                    return
-                }
-                const creds = new window.PasswordCredential({
-                    id: username,
-                    password: pwd,
-                    name: username
-                });
-
-                getProjects(creds);
-            }
-        }
-        catch (e) {
-            console.error(e);
-        }
-    }
-
-    // ------------------- GET STORED ENCODED TOKEN ------------
-    const getStoredEncodedToken = async () => {
-        showLoader(true);
-        try {
-            const userCreds = await navigator.credentials.get({
-                password: true,
-                federated: {
-                    providers: [
-                        'https://accounts.google.com'
-                    ]
-                },
-                unmediated: true
-            });
-
-            if (userCreds?.id && userCreds?.password) {// CREDS ALREADY AVAILABLE
-                encodedToken.current = (btoa(`${userCreds?.id}:${userCreds?.password}`));
-                getProjects();
-            }
-            else {
-
-                throw new Error('credentials retrieving failed')
-            }
-        }
-        catch (e) {
-            console.log(e)
-            setFormActive('login');
-            showLoader(false);
-        }
-
-    }
     //------------------UPLOAD SCREENSHOTS------------
 
     const uploadScreenshot = async (blob) => {
+        console.log(blob)
         try {
             const convertedFile = new File([blob], "sample.jpeg", { type: "image/jpeg" });
             const formData = new FormData();
             formData.append('file', convertedFile);
-            const res = await fetcher(`pendingfiles.json`, 'POST', formData);
-            if (res?.pendingFile)
-                pendingFileRef.current = res.pendingFile?.ref;
-            else throw new Error(res?.STATUS)
+            console.log(formData.get('file'))
+            chrome.runtime.sendMessage({ cmd: 'FETCH', url: "pendingfiles.json", method: 'POST', body: formData }, res => {
+                console.log(res)
+                if (res?.pendingFile)
+                    pendingFileRef.current = res.pendingFile?.ref;
+                else throw new Error(res?.STATUS)
+            });
         }
         catch (e) {
             console.error(e)
-        }
-    }
-
-
-    //------------ FETCHER : COMMON METHOD FOR CALLING API-------------------
-
-    const fetcher = async (url, method, body, headers, isAbsolute, withoutAuth) => {
-
-        const BASE_URL = 'https://portal.whiterabbit.group/';
-
-        if (!encodedToken.current) {// Check if token is available
-            showToastMessage('Token is invalid', url)
-            return;
-        }
-
-        const customHdrs = {
-            ...(!withoutAuth && { 'Authorization': `Basic ${encodedToken.current}` }),
-            ...headers
-        }
-
-        let options = {
-            method: method,
-            headers: customHdrs
-        }
-
-        if (method !== 'GET') {// If Post/Put, add body payload
-            options.body = body;
-        }
-
-        try {
-            const response =
-                await fetch(
-                    `${(isAbsolute) ? '' : BASE_URL}${url}`, options);
-            return await response.json();
-        }
-        catch (err) {
-            console.error(err)
         }
     }
 
@@ -401,15 +279,10 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler, 
                 <div className="screenshot-wrapper">
                     <div className="screenshot__form">
 
-                        {/* ------------- LOGIN ------------ */}
-                        {
-                            formActive === 'login' && <LoginForm submitLoginFormHandr={submitLoginFormHandr} showToastMessage={showToastMessage} />
-                        }
-
                         {/* ----------- DETAILS ---------- */}
                         {
-                            formActive === 'details' && <TaskDetailForm
-                                pendingFileRef={pendingFileRef} projects={projects} fetcher={fetcher} showToastMessage={showToastMessage} showLoader={showLoader} />
+                            <TaskDetailForm
+                                pendingFileRef={pendingFileRef} projects={projects} showToastMessage={showToastMessage} showLoader={showLoader} />
 
                         }
                     </div>
@@ -421,9 +294,9 @@ function PortalModal({ imageData: { dataUri, coords }, closePortalModalHandler, 
 
                         {/* <ImagePreviewer previewImageObj = {{coords : coords, dataUri : dataUri}}/> */}
 
-                      
-                        <CustomImageEditor coords = {coords}  dataUri = {dataUri} fetcher={fetcher} uploadScreenshot={uploadScreenshot} />
-                       
+
+                        <CustomImageEditor coords={coords} dataUri={dataUri} uploadScreenshot={uploadScreenshot} />
+
                     </div>
                 </div>
             </div>

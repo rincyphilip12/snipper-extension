@@ -1,8 +1,8 @@
 /*global chrome*/
-import {useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import CropBox from "./CropBox";
 import PortalModal from "./PortalModal/PortalModal";
-
+import Toast from "./Toast";
 function ContentScript() {
 
   // ------- INITS -----
@@ -10,35 +10,28 @@ function ContentScript() {
   const [isFabBtnActive, setIsFabBtnActive] = useState(false);
   const [isFabBtnVisible, setIsFabBtnVisible] = useState(false);
   const [portalModalData, setPortalModalData] = useState({});
-  const [filledBoxStyle,setFilledBoxStyle] = useState({});
+  const [filledBoxStyle, setFilledBoxStyle] = useState({});
+  const [toastMsg, setToastMsg] = useState('');
   const cropBoxRef = useRef();
-  // --------  PORT -------- 
-  let port = chrome.runtime.connect({ name: "FAB_BTN_PORT" });
 
-  //----------------- MSG LISTENER FROM BACKGROUND SCRIPT -----------------
-  port.onMessage.addListener((payload) => {
-
-    switch (payload.msg) {
-      case 'SENDING_DATA_URI':
-        setPortalModalData({
-          isOpen: true,
-          dataUri: payload.dataUri
-        })
-        break;
-    }
-  });
-
-  //------------------MSG LISTENER FROM POPUP ------------------
-  chrome.runtime.onMessage.addListener(
-    function (payload, sender, sendResponse) {
-      switch (payload.msg) {
-        case 'POPUP_SWITCH_STATUS':
-          setIsFabBtnVisible(payload.popupSwitchStatus === 'on');
-          sendResponse({ msg: "RECEIVED-POPUP-SWITCH_STATUS" });
-          break;
+  useEffect(() => {
+    chrome.runtime.onMessage.addListener(
+      function (payload, sender, sendResponse) {
+        if (payload.cmd == "POPUP_SWITCH_STATUS") {
+            setIsFabBtnVisible(payload.popupSwitchStatus === 'on');
+            sendResponse(true);
+        }
       }
-    }
-  );
+    );
+  }, []);
+
+
+  // ----------------------- SHOW TOAST MESSAGE ----------- 
+  const showToastMessage = (msg, closeModal) => {
+    setToastMsg(msg);
+    if (closeModal)
+      setTimeout(() => closePortalModalHandler(), 2000);
+  }
 
   //--------- FAB BTN CLICK HANDLER --------
   const fabBtnClickHandler = () => {
@@ -58,6 +51,17 @@ function ContentScript() {
     })
   }
 
+
+  // ------------- CALLED AFTER SNAPSHOT IS TAKEN --------
+  const snapshotCaptureHandler = () => {
+    chrome.runtime.sendMessage({ cmd: 'CAPTURE_SCREENSHOT' }, function (payload) {
+      console.log(payload)
+      setPortalModalData({
+        isOpen: true,
+        dataUri: payload.dataUri
+      })
+    });
+  }
   //----------- RENDER FUNCTION ------
   return (
     <>
@@ -97,15 +101,18 @@ function ContentScript() {
 
       {isFabBtnVisible && <button className={`fab ${isFabBtnActive ? 'on-mode' : 'off-mode'}`} type="button" onClick={fabBtnClickHandler}>S</button>}
 
-      {/*---- CROP BOX ----- */}
+      {/* ---- CROP BOX -----port={port} */}
       {isFabBtnActive &&
-        <CropBox port={port} ref={cropBoxRef} filledBoxStyle={filledBoxStyle} setFilledBoxStyle={setFilledBoxStyle} isFabBtnActive={isFabBtnActive}/>
+        <CropBox ref={cropBoxRef} snapshotCaptureHandler={snapshotCaptureHandler} filledBoxStyle={filledBoxStyle} setFilledBoxStyle={setFilledBoxStyle} isFabBtnActive={isFabBtnActive} />
       }
 
       {/* --- MODAL --- */}
       {portalModalData?.isOpen &&
         <PortalModal imageData={{ dataUri: portalModalData?.dataUri, coords: filledBoxStyle }}
-          closePortalModalHandler={closePortalModalHandler} />}
+          closePortalModalHandler={closePortalModalHandler}  showToastMessage={showToastMessage} />}
+
+                {/* ---------------TOAST---------------- */}
+      <Toast toastMsg={toastMsg} setToastMsg={setToastMsg} />
     </>
   );
 }
