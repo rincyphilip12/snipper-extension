@@ -1,0 +1,11 @@
+
+
+
+
+
+export const CHROME_CMD = {
+    LOGIN: "LOGIN",
+    CAPTURE_SCREENSHOT: "CAPTURE_SCREENSHOT",
+    IS_LOGGED_IN: "IS_LOGGED_IN",
+    FETCH: "FETCH"
+}

@@ -16,7 +16,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   console.log(request)
 
   switch (request.cmd) {
-    case "IS_LOGGEDIN":
+    case "IS_LOGGED_IN":
       chrome.storage.local.get(['token'], function (result) {
         console.log('Value currently is ' + result.token);
         sendResponse(!!result.token);
@@ -59,7 +59,6 @@ function generateAuthReq(code) {
 function captureScreenshot(sendResponse) {
 
   chrome.tabs.captureVisibleTab(null, {}, function (dataUri) {
-    console.log('screeennnssshiititt')
     sendResponse({ cmd: 'SENDING_DATA_URI', dataUri });
   });
 }
@@ -114,7 +113,7 @@ const fetcher = (url, method, body, headers, isAbsolute, withoutAuth, sendRespon
 
   chrome.storage.local.get(['token'], function (result) {
     let token = result.token;
-    
+
     if (!token) {// Check if token is available
       console.log('Token is invalid', url)
       return;

@@ -8,14 +8,14 @@ function Popup() {
   const toggleRef = useRef(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const tab = useRef();
-    useEffect(
+  useEffect(
     () => {
-      chrome.runtime.sendMessage({ cmd: 'IS_LOGGEDIN' }, response => {
+      chrome.runtime.sendMessage({ cmd: 'IS_LOGGED_IN' }, response => {
         setIsLoggedIn(response);
       });
 
       chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-         tab.current = tabs[0].id;
+        tab.current = tabs[0].id;
       });
     }, []
   )
@@ -36,7 +36,9 @@ function Popup() {
   // ------------ ON LOGIN -------- 
   const onLoginHandler = () => {
     chrome.runtime.sendMessage({ cmd: "LOGIN" }, response => {
+
       setIsLoggedIn(response.loggedIn)
+      console.log(response, "<<<")
     })
   }
 
