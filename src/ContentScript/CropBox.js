@@ -1,10 +1,8 @@
 /* global chrome */
 
 import { useImperativeHandle } from 'react';
-import { ReactComponent as TickSVG } from './tick.svg';
-import { useState, useRef, forwardRef, useEffect } from 'react';
-const CropBox = forwardRef(({ snapshotCaptureHandler, filledBoxStyle, setFilledBoxStyle, isFabBtnActive }, ref) => {
-
+import { useState, useRef ,forwardRef,useEffect} from 'react';
+const CropBox = forwardRef(({ snapshotCaptureHandler, filledBoxStyle, setFilledBoxStyle ,isFabBtnActive}, ref) => {
     const filledBoxRef = useRef();
     const containerRef = useRef();
     const [lastMouseX, setLastMouseX] = useState(0);
@@ -66,6 +64,7 @@ const CropBox = forwardRef(({ snapshotCaptureHandler, filledBoxStyle, setFilledB
     // ---------- MOUSE UP HANDLER ---------
     const mouseUpHandler = (e) => {
         setIsMouseDown(false);
+        snapshotCaptureHandler();
     }
 
     // ---------- MOUSE DOWN HANDLER ---------
@@ -153,11 +152,11 @@ const CropBox = forwardRef(({ snapshotCaptureHandler, filledBoxStyle, setFilledB
 
             <div className="crop-box" style={filledBoxStyle} ref={filledBoxRef}></div>
 
-            <div className="marker-box" style={{ left: filledBoxStyle.left, top: filledBoxStyle.top + filledBoxStyle.height, visibility: `${(filledBoxStyle.width > 0 || filledBoxStyle.height > 0) ? 'visible' : 'hidden'}` }}>
+            {/* <div className="marker-box" style={{ left: filledBoxStyle.left, top: filledBoxStyle.top + filledBoxStyle.height , visibility : `${ (filledBoxStyle.width > 0 || filledBoxStyle.height >0) ? 'visible' : 'hidden'}` }}>
                 <button className="done-btn" onClick={snapshotCaptureHandler}>
                     <TickSVG />
                 </button>
-            </div>
+            </div> */}
         </section>
     </>
     )

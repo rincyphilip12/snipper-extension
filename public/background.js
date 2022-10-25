@@ -19,15 +19,10 @@ chrome.runtime.onMessage.addListener(function (
   switch (request.cmd) {
     case "IS_LOGGEDIN":
       chrome.storage.local.get(null, function (result) {
-        console.log("Value currently is " + result.token);
-        console.log(
-          "Value currently is " + result.userData
-        );
+        console.log('Value currently is ' + result.token);
+        console.log('Value currently is ' + result.userData);
 
-        sendResponse({
-          loggedIn: !!result.token,
-          userData: result.userData,
-        });
+        sendResponse({ loggedIn: !!result.token, userData: result.userData });
       });
       return true;
 
@@ -43,25 +38,6 @@ chrome.runtime.onMessage.addListener(function (
       captureScreenshot(sendResponse);
       return true;
 
-    case "FETCH":
-      const {
-        url,
-        method,
-        body,
-        headers,
-        isAbsolute,
-        withoutAuth,
-      } = request;
-      fetcher(
-        url,
-        method,
-        body,
-        headers,
-        isAbsolute,
-        withoutAuth,
-        sendResponse
-      );
-      return true;
   }
 });
 
@@ -99,10 +75,10 @@ function logout(sendResponse) {
   chrome.storage.local.clear(function () {
     var error = chrome.runtime.lastError;
     if (error) {
-      sendResponse({ loggedOut: false });
+      sendResponse({ loggedOut: false })
       console.error(error);
     }
-    sendResponse({ loggedOut: true });
+    sendResponse({ loggedOut: true })
     // do something more
   });
 }
@@ -156,61 +132,25 @@ function login(sendResponse) {
         } else {
           throw new Error("signin error");
         }
+
+        fetch('https://www.teamwork.com/launchpad/v1/token.json', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(generateAuthReq(code))
+        }).then(res => res.json()
+        ).then(data => {
+          // 3. STORE ACCESS TOKEN
+
+          chrome.storage.local.set({ token: data.access_token, userData: data.user }, function () {
+            console.log('Value is set to ' + value);
+          });
+          sendResponse({ loggedIn: true, userData: data.user });
+        })
       }
     );
   } catch (e) {
     console.log(e);
   }
 }
-//------------ FETCHER : COMMON METHOD FOR CALLING API-------------------
-
-const fetcher = (
-  url,
-  method,
-  body,
-  headers,
-  isAbsolute,
-  withoutAuth,
-  sendResponse
-) => {
-  const BASE_URL = "https://portal.whiterabbit.group/";
-
-  chrome.storage.local.get(["token"], function (result) {
-    let token = result.token;
-
-    if (!token) {
-      // Check if token is available
-      console.log("Token is invalid", url);
-      return;
-    }
-
-    const customHdrs = {
-      ...(!withoutAuth && {
-        Authorization: `Bearer ${token}`,
-      }),
-      ...headers,
-    };
-
-    let options = {
-      method: method,
-      headers: customHdrs,
-    };
-
-    if (method !== "GET") {
-      // If Post/Put, add body payload
-      options.body = body;
-    }
-
-    console.log(options, "<<<>>>>");
-
-    try {
-      fetch(`${isAbsolute ? "" : BASE_URL}${url}`, options)
-        .then(res => res.json())
-        .then(data => {
-          sendResponse(data);
-        });
-    } catch (err) {
-      console.error(err);
-    }
-  });
-};

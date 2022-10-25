@@ -51,7 +51,6 @@ function ContentScript() {
     })
   }
 
-
   // ------------- CALLED AFTER SNAPSHOT IS TAKEN --------
   const snapshotCaptureHandler = () => {
     chrome.runtime.sendMessage({ cmd: 'CAPTURE_SCREENSHOT' }, function (payload) {

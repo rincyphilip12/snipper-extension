@@ -70,6 +70,10 @@ function Popup() {
     <div className="App">
       <style>
         {`
+        body{
+          margin:0;
+          padding:0;
+        }
 
         .App {
           text-align: center;

@@ -5,86 +5,118 @@ import CustomImageEditor from "../ImageEditor/CustomImageEditor";
 import TaskDetailForm from "./TaskDetailForm";
 
 function PortalModal({
-  imageData: { dataUri, coords },
-  closePortalModalHandler,
-  showToastMessage,
+    imageData: { dataUri, coords },
+    closePortalModalHandler,
+    showToastMessage,
 }) {
-  const [isLoaderOn, setIsLoaderOn] = useState(false);
-  const [projects, setProjects] = useState([]);
-  // const [previewImgDataURL, setPreviewImgDataURL] = useState(null)
-  const pendingFileRef = useRef();
+    const [isLoaderOn, setIsLoaderOn] = useState(false);
+    const [projects, setProjects] = useState([]);
+    const pendingFileRef = useRef();
 
-  useEffect(() => {
-    getProjects();
-  }, []);
+    useEffect(() => {
+        getProjects();
+    }, [])
 
-  // --------------GET PROJECTs LIST from API AND SHOW DETAILS FORM --------------
-  const getProjects = async () => {
-    try {
-      showLoader(true);
-      chrome.runtime.sendMessage(
-        {
-          cmd: "FETCH",
-          url: "projects.json",
-          method: "GET",
-        },
-        res => {
-          if (res?.STATUS === "OK") {
+    // --------------GET PROJECTs LIST from API AND SHOW DETAILS FORM --------------
+    const getProjects = async () => {
+        try {
+            showLoader(true);
+            const res = await fetcher("projects.json", 'GET');
+            if (res?.STATUS === 'OK') {
+                showLoader(false);
+                setProjects(res?.projects || []);
+                // uploadScreenshot();
+            }
+            else
+                throw new Error('get projects failed')
+
+        }
+        catch (e) {
             showLoader(false);
-            setProjects(res?.projects || []);
+            
+            // setProjects(res?.projects || []);
             // uploadScreenshot();
-          } else throw new Error("get projects failed");
         }
-      );
-    } catch (e) {
-      showLoader(false);
-      showToastMessage("Incorrect Credentials");
-    }
-  };
+    };
 
-  //------------------UPLOAD SCREENSHOTS------------
-
-  const uploadScreenshot = async blob => {
-    console.log(blob);
-    try {
-      const convertedFile = new File(
-        [blob],
-        "sample.jpeg",
-        { type: "image/jpeg" }
-      );
-      const formData = new FormData();
-      formData.append("file", convertedFile);
-      console.log(formData.get("file"));
-      chrome.runtime.sendMessage(
-        {
-          cmd: "FETCH",
-          url: "pendingfiles.json",
-          method: "POST",
-          body: formData,
-        },
-        res => {
-          console.log(res);
-          if (res?.pendingFile)
-            pendingFileRef.current = res.pendingFile?.ref;
-          else throw new Error(res?.STATUS);
+    //------------------UPLOAD SCREENSHOTS------------
+    const uploadScreenshot = async (blob) => {
+        try {
+            const convertedFile = new File([blob], "sample.jpeg", { type: "image/jpeg" });
+            const formData = new FormData();
+            formData.append('file', convertedFile);
+            const res = await fetcher(`pendingfiles.json`, 'POST', formData);
+            if (res?.pendingFile)
+                pendingFileRef.current = res.pendingFile?.ref;
+            else throw new Error(res?.STATUS)
         }
-      );
-    } catch (e) {
-      console.error(e);
+        catch (e) {
+            console.error(e)
+        }
+
+    };
+
+    // -------------- SHOW LOADER -------------------
+    const showLoader = status => {
+        setIsLoaderOn(status);
+    };
+
+
+    //------------ FETCHER : COMMON METHOD FOR CALLING API-------------------
+    const fetcher = async (url, method, body, headers, isAbsolute, withoutAuth) => {
+
+        const BASE_URL = 'https://portal.whiterabbit.group/';
+
+        let token = await readLocalStorage('token');
+
+        if (!token) {// Check if token is available
+            console.log('Token is invalid', url)
+            return;
+        }
+
+        const customHdrs = {
+            ...(!withoutAuth && { 'Authorization': `Bearer ${token}` }),
+            ...headers
+        }
+
+        let options = {
+            method: method,
+            headers: customHdrs
+        }
+
+        if (method !== 'GET') {// If Post/Put, add body payload
+            options.body = body;
+        }
+
+        try {
+            const res = await fetch(`${(isAbsolute) ? '' : BASE_URL}${url}`, options);
+            const data = await res.json();
+            return data;
+        }
+        catch (err) {
+            console.error(err)
+        }
     }
-  };
 
-  // -------------- SHOW LOADER -------------------
-  const showLoader = status => {
-    setIsLoaderOn(status);
-  };
+    //-------  READ FROM LOCAL STORAGE ---------
+    const readLocalStorage = async (key) => {
+        return new Promise((resolve, reject) => {
+            chrome.storage.local.get([key], function (result) {
+                if (result[key] === undefined) {
+                    reject();
+                } else {
+                    resolve(result[key]);
+                }
+            });
+        });
+    };
 
-  // --------------- RENDER -----------------
+    // --------------- RENDER -----------------
 
-  return (
-    <>
-      <style>
-        {` /* The Modal (background) */
+    return (
+        <>
+            <style>
+                {` /* The Modal (background) */
           .modal {
             font-family: "Roboto", sans-serif;
             position: fixed; /* Stay in place */
@@ -307,75 +339,49 @@ function PortalModal({
            from {-webkit-transform: rotate(0deg);}
            to {-webkit-transform: rotate(360deg);}
         }`}
-      </style>
+            </style>
+            <div id="portalModal" className="modal">
+                {/* <!-- Modal content --> */}
+                <div className="modal-content">
+                  
+                    {/* ---------- LOADER -------------- */}
+                    <div className={`loader-wrap ${isLoaderOn ? 'is-active' : ''}`} >
+                        <span></span>
+                    </div>
+                    {/* ---------- HEADER ------- */}
+                    <header>
+                        <h1 className="modal-header-text">PORTAL APP - WHITE RABBIT GROUP</h1>
+                        <span className="close" onClick={closePortalModalHandler}>&times;</span>
+                    </header>
+                    <div className="screenshot-wrapper">
+                        <div className="screenshot__form">
 
-      <div id="portalModal" className="modal">
-        {/* <!-- Modal content --> */}
-        <div className="modal-content">
-          {/* ---------- LOADER -------------- */}
-          <div
-            className={`loader-wrap ${
-              isLoaderOn ? "is-active" : ""
-            }`}
-          >
-            <span></span>
-          </div>
-          {/* ---------- HEADER ------- */}
-          <header>
-            <h1 className="modal-header-text">
-              Portal App - White Rabbit Group
-            </h1>
-            <span
-              className="close"
-              onClick={closePortalModalHandler}
-            >
-              <svg
-                width="11"
-                height="11"
-                viewBox="0 0 11 11"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M7.03125 5L10.25 1.8125L10.9062 1.15625C11 1.0625 11 0.90625 10.9062 0.78125L10.2188 0.09375C10.0938 0 9.9375 0 9.8438 0.09375L6 3.96875L2.125 0.09375C2.03125 0 1.875 0 1.75 0.09375L1.0625 0.78125C0.96875 0.90625 0.96875 1.0625 1.0625 1.15625L4.9375 5L1.0625 8.875C0.96875 8.9688 0.96875 9.125 1.0625 9.25L1.75 9.9375C1.875 10.0312 2.03125 10.0312 2.125 9.9375L6 6.0625L9.1875 9.2812L9.8438 9.9375C9.9375 10.0312 10.0938 10.0312 10.2188 9.9375L10.9062 9.25C11 9.125 11 8.9688 10.9062 8.875L7.03125 5Z"
-                  fill="#0B0E1F"
-                />
-              </svg>
-            </span>
-          </header>
-          <div className="screenshot-wrapper">
-            <div className="screenshot__form">
-              {/* ----------- DETAILS ---------- */}
-              {
-                <TaskDetailForm
-                  pendingFileRef={pendingFileRef}
-                  projects={projects}
-                  showToastMessage={showToastMessage}
-                  showLoader={showLoader}
-                />
-              }
-            </div>
-            {/* ------------- IMAGE PREVIEW -------------- */}
-            <div className="screenshot__preview">
-              <h2 className="l-title l-title--sm">
-                IMAGE PREVIEW
-              </h2>
-              {/* <canvas className="result-preview" id="preview-image" ref={previewImageCanvasRef} >
+                            {/* ----------- DETAILS ---------- */}
+                            {
+                                <TaskDetailForm
+                                    pendingFileRef={pendingFileRef} projects={projects} fetcher={fetcher} showToastMessage={showToastMessage} showLoader={showLoader} />
+
+                            }
+                        </div>
+                        {/* ------------- IMAGE PREVIEW -------------- */}
+                        <div className="screenshot__preview">
+                            <h2 className="l-title l-title--sm">IMAGE PREVIEW</h2>
+                            {/* <canvas className="result-preview" id="preview-image" ref={previewImageCanvasRef} >
                         </canvas> */}
 
-              {/* <ImagePreviewer previewImageObj = {{coords : coords, dataUri : dataUri}}/> */}
+                            {/* <ImagePreviewer previewImageObj = {{coords : coords, dataUri : dataUri}}/> */}
 
-              <CustomImageEditor
-                coords={coords}
-                dataUri={dataUri}
-                uploadScreenshot={uploadScreenshot}
-              />
+                            <CustomImageEditor
+                                coords={coords}
+                                dataUri={dataUri}
+                                uploadScreenshot={uploadScreenshot}
+                            />
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </>
-  );
+        </>
+    );
 }
 
 export default PortalModal;
