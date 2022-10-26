@@ -1,6 +1,6 @@
 /* global chrome */
 
-import { useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 function TaskDetailForm({ pendingFileRef, projects, showToastMessage, showLoader, fetcher }) {
 
     const [taskList, setTaskLists] = useState([]);
@@ -11,6 +11,39 @@ function TaskDetailForm({ pendingFileRef, projects, showToastMessage, showLoader
     const descriptionRef = useRef();
     const [taskListLoader, setTaskListLoader] = useState(false);
 
+    // -------- ON LOAD ------
+    useLayoutEffect(() => {
+        getBrowserOSDetails()
+    }, []);
+
+    // ---------- GET BROWSER DETAILS : DISPLAY OS AND BROWSER DETAILS IN THE TEXTAREA -----
+    const getBrowserOSDetails = () => {
+        const nAgt = navigator.userAgent;
+        // -------- BROWSER INFO ----------
+        // In Chrome, the true version is after "Chrome" 
+        const browserName = "Chrome";
+        const verOffset = nAgt.indexOf("Chrome");
+        let fullVersion = nAgt.substring(verOffset + 7);
+        let ix;
+        let OSName = "Unknown OS";
+
+        // trim the fullVersion string at semicolon/space if present
+
+        if ((ix = fullVersion.indexOf(";")) != -1)
+            fullVersion = fullVersion.substring(0, ix);
+        if ((ix = fullVersion.indexOf(" ")) != -1)
+            fullVersion = fullVersion.substring(0, ix);
+
+        // ----- OS INFO -----
+
+        if (nAgt.indexOf("Win") != -1) OSName = "Windows";
+        if (nAgt.indexOf("Mac") != -1) OSName = "MacOS";
+        if (nAgt.indexOf("X11") != -1) OSName = "UNIX";
+        if (nAgt.indexOf("Linux") != -1) OSName = "Linux";
+
+        descriptionRef.current.value = `OS : ${OSName}\nBrowser name : ${browserName}\nBrowser Full version : ${fullVersion}\nScreen Resolution :  width ${window.screen.availWidth} X height ${window.screen.availHeight}\nnavigator.userAgent : ${nAgt} `;
+
+    }
     // --------------- PROJECTS DROPDOWN HANDLR------------------
     const projectsDropdownChangeHandler = async (e) => {
         const id = e?.target?.value;
@@ -47,10 +80,16 @@ function TaskDetailForm({ pendingFileRef, projects, showToastMessage, showLoader
 
     const createSubTaskHandler = async (e) => {
 
-        if (!(contentRef?.current?.value && descriptionRef?.current?.value && pendingFileRef?.current && selectedPriority?.current && selectedTaskId?.current)) {
+        if (!(contentRef?.current?.value && descriptionRef?.current?.value && selectedPriority?.current && selectedTaskId?.current)) { // IF FORM IS INCOMPLETE
             showToastMessage('Please enter complete details');
             return;
         }
+
+        else if (!pendingFileRef?.current) { // IF IMAGE FILE NOT ADDED
+            showToastMessage('Please edit the image and click on done button');
+            return;
+        }
+
         try {
             const reqBody = {
                 'todo-item': {
@@ -63,10 +102,10 @@ function TaskDetailForm({ pendingFileRef, projects, showToastMessage, showLoader
 
             showLoader(true);
 
-            const res = await fetcher(`tasks/${selectedTaskId?.current}.json`,'POST', JSON.stringify(reqBody))
+            const res = await fetcher(`tasks/${selectedTaskId?.current}.json`, 'POST', JSON.stringify(reqBody))
             if (res?.STATUS === 'OK') {
                 showLoader(false)
-                showToastMessage('Subtask has been created successfully', true)
+                showToastMessage('Subtask has been created successfully.', true,'CREATED SUBTASK LINK:',`https://portal.whiterabbit.group/app/tasks/${res.id}`)
             }
             else if (res?.STATUS === 'Error')
                 throw new Error(res?.MESSAGE)
@@ -141,7 +180,7 @@ function TaskDetailForm({ pendingFileRef, projects, showToastMessage, showLoader
                 <div class="l-col">
                     <label htmlFor="">
                         <span>Description</span>
-                        <input type="text" ref={descriptionRef} />
+                        <textarea ref={descriptionRef}></textarea>
                     </label>
                 </div>
                 <div class="l-col">
@@ -156,6 +195,7 @@ function TaskDetailForm({ pendingFileRef, projects, showToastMessage, showLoader
                     </label>
                 </div>
 
+                {/* ---------- SUBMIT BTN ----- */}
                 <button
                     class="l-btn l-btn--dark"
                     type="button"

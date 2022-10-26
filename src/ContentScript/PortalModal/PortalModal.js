@@ -12,7 +12,7 @@ function PortalModal({
     const [isLoaderOn, setIsLoaderOn] = useState(false);
     const [projects, setProjects] = useState([]);
     const pendingFileRef = useRef();
-
+    const [showTaskDetailForm, setShowTaskDetailForm] = useState(false);
     useEffect(() => {
         getProjects();
     }, [])
@@ -25,7 +25,6 @@ function PortalModal({
             if (res?.STATUS === 'OK') {
                 showLoader(false);
                 setProjects(res?.projects || []);
-                // uploadScreenshot();
             }
             else
                 throw new Error('get projects failed')
@@ -33,9 +32,6 @@ function PortalModal({
         }
         catch (e) {
             showLoader(false);
-            
-            // setProjects(res?.projects || []);
-            // uploadScreenshot();
         }
     };
 
@@ -46,12 +42,17 @@ function PortalModal({
             const formData = new FormData();
             formData.append('file', convertedFile);
             const res = await fetcher(`pendingfiles.json`, 'POST', formData);
-            if (res?.pendingFile)
+            if (res?.pendingFile) {
                 pendingFileRef.current = res.pendingFile?.ref;
+                showToastMessage('Image has been uploaded successfully.');
+                setShowTaskDetailForm(true)
+            }
             else throw new Error(res?.STATUS)
         }
         catch (e) {
             console.error(e)
+            showToastMessage('Error in Image Upload.')
+            setShowTaskDetailForm(false)
         }
 
     };
@@ -174,7 +175,7 @@ function PortalModal({
             padding-top:20px;
           }
           .screenshot__form{
-            flex-basis: 40%;
+          
             padding-right:40px;
           }
 
@@ -278,9 +279,6 @@ function PortalModal({
             font-size:13px;
             line-height:19px;
         }
-        .screenshot__preview{
-            flex-basis: 60%;
-        }
         .screenshot__preview .l-title{
             font-size: 13px;
             line-height:19px;
@@ -343,7 +341,7 @@ function PortalModal({
             <div id="portalModal" className="modal">
                 {/* <!-- Modal content --> */}
                 <div className="modal-content">
-                  
+
                     {/* ---------- LOADER -------------- */}
                     <div className={`loader-wrap ${isLoaderOn ? 'is-active' : ''}`} >
                         <span></span>
@@ -354,29 +352,22 @@ function PortalModal({
                         <span className="close" onClick={closePortalModalHandler}>&times;</span>
                     </header>
                     <div className="screenshot-wrapper">
-                        <div className="screenshot__form">
 
-                            {/* ----------- DETAILS ---------- */}
-                            {
-                                <TaskDetailForm
-                                    pendingFileRef={pendingFileRef} projects={projects} fetcher={fetcher} showToastMessage={showToastMessage} showLoader={showLoader} />
-
-                            }
-                        </div>
                         {/* ------------- IMAGE PREVIEW -------------- */}
-                        <div className="screenshot__preview">
+                        {!showTaskDetailForm && <div className="screenshot__preview">
                             <h2 className="l-title l-title--sm">IMAGE PREVIEW</h2>
-                            {/* <canvas className="result-preview" id="preview-image" ref={previewImageCanvasRef} >
-                        </canvas> */}
-
-                            {/* <ImagePreviewer previewImageObj = {{coords : coords, dataUri : dataUri}}/> */}
-
                             <CustomImageEditor
                                 coords={coords}
                                 dataUri={dataUri}
                                 uploadScreenshot={uploadScreenshot}
                             />
-                        </div>
+                        </div>}
+
+                        {/* ----------- DETAILS FORM ---------- */}
+                        {showTaskDetailForm && <div className="screenshot__form">
+                            <TaskDetailForm
+                                pendingFileRef={pendingFileRef} projects={projects} fetcher={fetcher} showToastMessage={showToastMessage} showLoader={showLoader} />
+                        </div>}
                     </div>
                 </div>
             </div>

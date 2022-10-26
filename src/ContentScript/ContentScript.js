@@ -11,7 +11,8 @@ function ContentScript() {
   const [isFabBtnVisible, setIsFabBtnVisible] = useState(false);
   const [portalModalData, setPortalModalData] = useState({});
   const [filledBoxStyle, setFilledBoxStyle] = useState({});
-  const [toastMsg, setToastMsg] = useState('');
+  const [toastMsg, setToastMsg] = useState();
+  const [anchorObj, setAnchorObj] = useState({});
   const cropBoxRef = useRef();
 
   useEffect(() => {
@@ -27,10 +28,11 @@ function ContentScript() {
 
 
   // ----------------------- SHOW TOAST MESSAGE ----------- 
-  const showToastMessage = (msg, closeModal) => {
+  const showToastMessage = (msg, closeModal, anchorText, anchorLink) => {
     setToastMsg(msg);
+    if (anchorLink && anchorText) setAnchorObj({ link: anchorLink, text: anchorText });
     if (closeModal)
-      setTimeout(() => closePortalModalHandler(), 2000);
+      setTimeout(() => closePortalModalHandler(), 3500);
   }
 
   //--------- FAB BTN CLICK HANDLER --------
@@ -100,7 +102,7 @@ function ContentScript() {
 
       {isFabBtnVisible && <button className={`fab ${isFabBtnActive ? 'on-mode' : 'off-mode'}`} type="button" onClick={fabBtnClickHandler}>S</button>}
 
-      {/* ---- CROP BOX -----port={port} */}
+      {/* ---- CROP BOX -----*/}
       {isFabBtnActive &&
         <CropBox ref={cropBoxRef} snapshotCaptureHandler={snapshotCaptureHandler} filledBoxStyle={filledBoxStyle} setFilledBoxStyle={setFilledBoxStyle} isFabBtnActive={isFabBtnActive} />
       }
@@ -111,7 +113,7 @@ function ContentScript() {
           closePortalModalHandler={closePortalModalHandler} showToastMessage={showToastMessage} />}
 
       {/* ---------------TOAST---------------- */}
-      <Toast toastMsg={toastMsg} setToastMsg={setToastMsg} />
+      <Toast toastMsg={toastMsg} setToastMsg={setToastMsg} anchorObj={anchorObj} setAnchorObj={setAnchorObj} />
     </>
   );
 }

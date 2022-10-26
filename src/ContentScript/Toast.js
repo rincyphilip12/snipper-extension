@@ -1,10 +1,11 @@
 import { useCallback, useEffect } from 'react'
 
-const Toast = ({ toastMsg, setToastMsg }) => {
+const Toast = ({ toastMsg, setToastMsg, anchorObj, setAnchorObj }) => {
 
     const deleteToast = useCallback(() => {
         setToastMsg('');
-    }, [toastMsg, setToastMsg]);
+        setAnchorObj({ text: '', link: '' })
+    }, [toastMsg, setToastMsg, anchorObj, setAnchorObj]);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -16,7 +17,7 @@ const Toast = ({ toastMsg, setToastMsg }) => {
         return () => {
             clearInterval(interval);
         }
-    }, [toastMsg, deleteToast]);
+    }, [toastMsg, anchorObj, deleteToast]);
 
     return (
         <>
@@ -46,7 +47,7 @@ const Toast = ({ toastMsg, setToastMsg }) => {
                         padding: 30px;
                         margin-bottom: 15px;
                         width: 300px;
-                        max-height: 100px;
+                        max-height: 200px;
                         border-radius: 3px 3px 3px 3px;
                         box-shadow: 0 0 10px #999;
                         color: #000;
@@ -68,21 +69,19 @@ const Toast = ({ toastMsg, setToastMsg }) => {
                         margin-top: 0;
                         margin-bottom: 6px;
                         width: 300px;
-                        height: 18px;
+                        min-height: 18px;
                     }
 
                     .notification-message {
                         margin: 0;
                         text-align: left;
-                        height: 18px;
+                        min-height: 18px;
                         margin-left: -1px;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
+                        word-break:break-word;
                         white-space: nowrap;
                     }
 
                     .toast {
-                        height: 75px;
                         width: 365px;
                         color: #fff;
                         padding: 20px 15px 10px 10px;
@@ -129,6 +128,10 @@ const Toast = ({ toastMsg, setToastMsg }) => {
                         <div>
                             <p className="notification-title">Notification</p>
                             <p className="notification-message">{toastMsg}</p>
+                            {anchorObj.text &&
+                                <p className="notification-message">{anchorObj.text} :
+                                    <br /> <a href={anchorObj.link}>{anchorObj.link}</a>
+                                </p>}
                         </div>
                     </div>
                 }
