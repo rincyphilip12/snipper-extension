@@ -1,86 +1,37 @@
+import React, { useState, useRef, useEffect } from "react";
 import { Stage, Layer } from "react-konva";
-import {
-  ArrowDrawable,
-  CircleDrawable,
-  TextDrawable,
-} from "./Drawables";
+import Rectangle from "./Rectangle";
+import Circle from "./Circle";
+import ArrowNode from "./Arrow";
+import TextNode from "./TextNode";
 import URLImage from "./URLImage";
-import { useRef, useState } from "react";
+import { SHAPECONFIG } from "./ShapeConfig";
 
 function SceneWithDrawables({
   uploadScreenshot,
   dataUri,
   coords,
 }) {
-  const [drawables, setDrawables] = useState([]);
-  const [newDrawable, setNewDrawable] = useState([]);
-  const [newDrawableType, setNewDrawableType] =
-    useState("ArrowDrawable");
-  const [stageWidth, setStageWidth] = useState(0);
-  const [stageHeight, setStageHeight] = useState(0);
-  const stageRef = useRef();
+  const [stageWidth, setStageWidth] = useState();
+  const [stageHeight, setStageHeight] = useState();
+  const [shapesArr, setShapesArr] = useState([]);
+  const [selectedId, selectShape] = useState(null);
+  // const [, updateState] = React.useState();
+  const stageEl = useRef();
+  const layerEl = useRef();
+  // const [src, setSrc] = useState();
+  const shapesCounter = useRef({
+    rectangle: 0,
+    circle: 0,
+    text: 0,
+    arrow: 0,
+  });
 
-  // ----------- GET NEW DRAWABLE TYPE ----------
-  const getNewDrawableBasedOnType = (x, y, type) => {
-    const drawableClasses = {
-      ArrowDrawable,
-      CircleDrawable,
-      TextDrawable,
-    };
-    return new drawableClasses[type](x, y);
-  };
-
-  // ------------------ MOUSE DOWN ---------------
-  const handleMouseDown = e => {
-    if (newDrawable.length === 0) {
-      const { x, y } = e.target
-        .getStage()
-        .getPointerPosition();
-      const newDrawable = getNewDrawableBasedOnType(
-        x,
-        y,
-        newDrawableType
-      );
-      setNewDrawable([newDrawable]);
-    }
-  };
-
-  // ------------------ MOUSE UP --------------
-  const handleMouseUp = e => {
-    console.log(e);
-    if (newDrawable.length === 1) {
-      const { x, y } = e.target
-        .getStage()
-        .getPointerPosition();
-      const drawableToAdd = newDrawable[0];
-      drawableToAdd.registerMovement(x, y);
-      // drawables.push(drawableToAdd);
-      setNewDrawable([]);
-      setDrawables(oldDrawables => [
-        ...oldDrawables,
-        drawableToAdd,
-      ]);
-    }
-  };
-
-  // ---------------- MOUSE MOVE ------------
-  const handleMouseMove = e => {
-    // const { newDrawable } = this.state;
-    if (newDrawable.length === 1) {
-      const { x, y } = e.target
-        .getStage()
-        .getPointerPosition();
-      const updatedNewDrawable = newDrawable[0];
-      updatedNewDrawable.registerMovement(x, y);
-      setNewDrawable([updatedNewDrawable]);
-    }
-  };
-
-  // --------------- ON EDIT COMPLETE -------–
-  const onEditComplete = async () => {
-    const imgDataUrl = stageRef.current.toDataURL();
-    const blob = await (await fetch(imgDataUrl)).blob();
-    uploadScreenshot(blob);
+  const shapeComponentsMap = {
+    rectangle: Rectangle,
+    circle: Circle,
+    text: TextNode,
+    arrow: ArrowNode,
   };
 
   // ----------- SET STAGE DIMENSIONS ------
@@ -89,57 +40,142 @@ function SceneWithDrawables({
     setStageHeight(height);
   };
 
-  // ------------ UNDO -------------
-  const onUndoDrawables = () => {
-    if (!drawables[0]) return;
-    let oldDrawables = [...drawables];
-    oldDrawables.splice(-1, 2);
-    setDrawables(oldDrawables);
+  // ---- ADD A SHAPE COMPONENT and CONFIG TO THE SHAPE ARR & Adding a counter _------
+  // --- FORMAT --- >
+  // shapesCounter : {  rectangle : 0, circle:0, arrow:0, text:0 }
+  // shapesArr : [ {component: Rectangle, config : {x:0,y:0,width:100,,.... }}, {component: Circle, config : {x:0,y:0,width:100,,.... }]
+
+  const addShape = shapeType => {
+    const counter = shapesCounter.current[shapeType]; //a counter storing Num of shapes added
+    shapesCounter.current[shapeType] = counter + 1;
+
+    // GET DEFAULT CONFIG of THE SHAPES
+    const config = {
+      ...SHAPECONFIG[shapeType],
+      id: `${shapeType}${counter}`,
+    };
+    // RETURNS A REACT COMPONENT WITH CONFIG PASSED
+    const shapeComponent = getShapeComponent(shapeType);
+
+    // APPEND THE COMPONENT TO SHAPES ARR
+    const shapes = shapesArr.concat({
+      component: shapeComponent,
+      config,
+    });
+    setShapesArr(shapes);
+
   };
+
+  // ------- GET CORRESPONDING SHAPE REACT COMPONENT ------
+  const getShapeComponent = shapeType => {
+    if (
+      typeof shapeComponentsMap[shapeType] !== "undefined"
+    )
+      return shapeComponentsMap[shapeType];
+  };
+
+  // ----------- FORCE UPDATE -------------
+  // const forceUpdate = React.useCallback(
+  //   () => updateState({}),
+  //   []
+  // );
+
+// ------------ UNDO ----------------
+  const undo = () => {
+    const tempShapesArr = [...shapesArr];
+    tempShapesArr.pop();
+    setShapesArr(tempShapesArr);
+  };
+  // --------------- ON EDIT COMPLETE -------–
+  const onEditComplete = async () => {
+    const imgDataUrl = stageEl.current.toDataURL();
+    const blob = await (await fetch(imgDataUrl)).blob();
+    uploadScreenshot(blob);
+    // setSrc( // for testing purpose!!!
+    //   URL.createObjectURL(
+    //     new File([blob], "sample.jpeg", {
+    //       type: "image/jpeg",
+    //     })
+    //   )
+    // );
+  };
+
+  // ----------------- ON BACKGROUND IMAGE CLICK ----------
+  const onBgImageClick = (e) => {
+    selectShape(null)
+  }
+
   return (
-    <div>
+    <div className="home-page">
       <button
-        onClick={e => setNewDrawableType("ArrowDrawable")}
+        type="button"
+        onClick={e => addShape("rectangle")}
       >
-        Draw Arrows
+        Rectangle
       </button>
       <button
-        onClick={e => setNewDrawableType("CircleDrawable")}
+        type="button"
+        onClick={e => addShape("circle")}
       >
-        Draw Circles
+        Circle
+      </button>
+      <button type="button" onClick={e => addShape("text")}>
+        Text
       </button>
       <button
-        onClick={e => setNewDrawableType("TextDrawable")}
+        type="button"
+        onClick={e => addShape("arrow")}
       >
-        Add Text
+        Arrow
       </button>
-      <button onClick={onUndoDrawables}>Undo!</button>
-      <button onClick={onEditComplete}>Done!</button>
+      <button type="button" onClick={onEditComplete}>
+        Done
+      </button>
+      <button type="button" onClick={undo}>
+        Undo
+      </button>
+     
+
       <Stage
-        ref={stageRef}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
+        x={0}
+        y={0}
         width={stageWidth}
         height={stageHeight}
+        ref={stageEl}
       >
-        <Layer>
-          {/* CLIPPED IMAGE */}
+        <Layer ref={layerEl}>
+          {/* BG IMAGE */}
           <URLImage
             src={dataUri}
             coords={coords}
             setStageDimensions={setStageDimensions}
+            onClick = {onBgImageClick}
           />
 
-          {/* DRAWABLES  */}
-          {drawables[0] &&
-            [...drawables, ...newDrawable].map(drawable => {
-              return drawable.render();
-            })}
+          {/* SHAPES ARRAY */}
+          {shapesArr.map((shapeComponent, i) => {
+            const SComponent = shapeComponent.component;
+            const sconfig = shapeComponent.config;
+            return (
+              <SComponent
+                key={sconfig.id}
+                shapeProps={sconfig}
+                isSelected={sconfig.id === selectedId}
+                onSelect={() => {
+                  selectShape(sconfig.id);
+                }}
+                onChange={newAttrs => {
+                  const tempShapesArr = [...shapesArr]
+                  tempShapesArr[i].config = newAttrs;
+                  setShapesArr(tempShapesArr);
+                }}
+              />
+            );
+          })}
         </Layer>
       </Stage>
+      {/* <img src={src} alt="" /> */}
     </div>
   );
 }
-
 export default SceneWithDrawables;

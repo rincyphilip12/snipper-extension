@@ -5,7 +5,7 @@ const Toast = ({ toastMsg, setToastMsg, anchorObj, setAnchorObj }) => {
     const deleteToast = useCallback(() => {
         setToastMsg('');
         setAnchorObj({ text: '', link: '' })
-    }, [toastMsg, setToastMsg, anchorObj, setAnchorObj]);
+    }, [ setToastMsg, setAnchorObj]);
 
     useEffect(() => {
         const interval = setInterval(() => {

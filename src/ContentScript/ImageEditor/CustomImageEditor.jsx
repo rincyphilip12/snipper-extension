@@ -11,6 +11,7 @@ function CustomImageEditor({
       uploadScreenshot={uploadScreenshot}
       dataUri={dataUri}
     />
+    
   );
 }
 

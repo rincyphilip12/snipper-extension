@@ -53,6 +53,7 @@ export default class URLImage extends React.Component {
                     ref={(node) => {
                         this.imageNode = node;
                     }}
+                    onClick = {this.props.onClick}
                 />
             );
         }

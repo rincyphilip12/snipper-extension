@@ -1,5 +1,3 @@
-/* global chrome */
-
 import { useLayoutEffect, useRef, useState } from 'react';
 function TaskDetailForm({ pendingFileRef, projects, showToastMessage, showLoader, fetcher }) {
 
@@ -29,17 +27,17 @@ function TaskDetailForm({ pendingFileRef, projects, showToastMessage, showLoader
 
         // trim the fullVersion string at semicolon/space if present
 
-        if ((ix = fullVersion.indexOf(";")) != -1)
+        if ((ix = fullVersion.indexOf(";")) !== -1)
             fullVersion = fullVersion.substring(0, ix);
-        if ((ix = fullVersion.indexOf(" ")) != -1)
+        if ((ix = fullVersion.indexOf(" ")) !== -1)
             fullVersion = fullVersion.substring(0, ix);
 
         // ----- OS INFO -----
 
-        if (nAgt.indexOf("Win") != -1) OSName = "Windows";
-        if (nAgt.indexOf("Mac") != -1) OSName = "MacOS";
-        if (nAgt.indexOf("X11") != -1) OSName = "UNIX";
-        if (nAgt.indexOf("Linux") != -1) OSName = "Linux";
+        if (nAgt.indexOf("Win") !== -1) OSName = "Windows";
+        if (nAgt.indexOf("Mac") !== -1) OSName = "MacOS";
+        if (nAgt.indexOf("X11") !== -1) OSName = "UNIX";
+        if (nAgt.indexOf("Linux") !== -1) OSName = "Linux";
 
         descriptionRef.current.value = `OS : ${OSName}\nBrowser name : ${browserName}\nBrowser Full version : ${fullVersion}\nScreen Resolution :  width ${window.screen.availWidth} X height ${window.screen.availHeight}\nnavigator.userAgent : ${nAgt} `;
 
@@ -54,7 +52,7 @@ function TaskDetailForm({ pendingFileRef, projects, showToastMessage, showLoader
             setTaskListLoader(true);
 
             const res = await fetcher(`projects/${id}/tasks.json`, 'GET');
-            if (res.STATUS == 'OK') {
+            if (res.STATUS === 'OK') {
                 selectedProjectId.current = id;
                 setTaskLists(res['todo-items']);
                 setTaskListLoader(false);

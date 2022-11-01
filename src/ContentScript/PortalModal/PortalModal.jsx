@@ -42,8 +42,10 @@ function PortalModal({
             const formData = new FormData();
             formData.append('file', convertedFile);
             const res = await fetcher(`pendingfiles.json`, 'POST', formData);
+            showLoader(true);
             if (res?.pendingFile) {
                 pendingFileRef.current = res.pendingFile?.ref;
+                showLoader(false);
                 showToastMessage('Image has been uploaded successfully.');
                 setShowTaskDetailForm(true)
             }
@@ -52,7 +54,8 @@ function PortalModal({
         catch (e) {
             console.error(e)
             showToastMessage('Error in Image Upload.')
-            setShowTaskDetailForm(false)
+            setShowTaskDetailForm(false);
+            showLoader(false);
         }
 
     };
@@ -360,7 +363,8 @@ function PortalModal({
                                 coords={coords}
                                 dataUri={dataUri}
                                 uploadScreenshot={uploadScreenshot}
-                            />
+                                
+                            />  
                         </div>}
 
                         {/* ----------- DETAILS FORM ---------- */}

@@ -2,19 +2,17 @@ import React, { useRef, useEffect } from "react";
 import { Text, Transformer } from "react-konva";
 
 export function ResizableText({
-  x,
-  y,
-  text,
+  shapeProps,
   isSelected,
-  width,
-  onResize,
   onClick,
-  onDoubleClick
+  onDoubleClick,
+  onChangeHandler,
 }) {
   const textRef = useRef(null);
   const transformerRef = useRef(null);
 
   useEffect(() => {
+
     if (isSelected && transformerRef.current !== null) {
       transformerRef.current.nodes([textRef.current]);
       transformerRef.current.getLayer().batchDraw();
@@ -28,13 +26,25 @@ export function ResizableText({
       const newHeight = textNode.height() * textNode.scaleY();
       textNode.setAttrs({
         width: newWidth,
-        scaleX: 1
+        scaleX: 1,
       });
-      onResize(newWidth, newHeight);
+      // onResize(newWidth, newHeight);
+      onChangeHandler({
+        ...shapeProps,
+        width: newWidth,
+        scaleX: 1,
+      });
     }
   }
 
-  const transformer = isSelected ? (
+
+  const onDblClickHandler = (e) => {
+    if(transformerRef.current) 
+    transformerRef.current.show();
+    onDoubleClick(e);
+  };
+
+  const transformer = isSelected && (
     <Transformer
       ref={transformerRef}
       rotateEnabled={false}
@@ -45,25 +55,26 @@ export function ResizableText({
         return newBox;
       }}
     />
-  ) : null;
+  );
 
   return (
     <>
       <Text
-        x={x}
-        y={y}
+        {...shapeProps}
         ref={textRef}
-        text={text}
-        fill="black"
-        fontFamily="sans-serif"
-        fontSize={24}
         perfectDrawEnabled={false}
         onTransform={handleResize}
         onClick={onClick}
         onTap={onClick}
-        onDblClick={onDoubleClick}
-        onDblTap={onDoubleClick}
-        width={width}
+        onDblClick={onDblClickHandler}
+        onDblTap={onDblClickHandler}
+        onDragEnd={(e) => {
+          onChangeHandler({
+            ...shapeProps,
+            x: e.target.x(),
+            y: e.target.y(),
+          });
+        }}
         draggable={true}
       />
       {transformer}

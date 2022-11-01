@@ -1,45 +1,38 @@
 import React from "react";
 import { Html } from "react-konva-utils";
 
-function getStyle(width, height) {
-  const isFirefox = navigator.userAgent.toLowerCase().indexOf("firefox") > -1;
+function getStyle(shapeProps) {
   const baseStyle = {
-    width: `${width}px`,
-    height: `${height}px`,
+    width: `${shapeProps.width}px`,
+    height: `${shapeProps.height}px`,
     border: "none",
     padding: "0px",
     margin: "0px",
     background: "none",
     outline: "none",
     resize: "none",
-    colour: "black",
-    fontSize: "24px",
-    fontFamily: "sans-serif"
+    margintop: "-4px",
+    color: shapeProps.fill,
+    fontSize: `${shapeProps.fontSize}px`,
+    fontFamily: shapeProps.fontFamily,
   };
-  if (isFirefox) {
-    return baseStyle;
-  }
-  return {
-    ...baseStyle,
-    margintop: "-4px"
-  };
+  return baseStyle;
 }
 
-export function EditableTextInput({
-  x,
-  y,
-  width,
-  height,
-  value,
-  onChange,
-  onKeyDown
-}) {
-  const style = getStyle(width, height);
+export function EditableTextInput({ shapeProps, onChangeHandler, onKeyDown }) {
+  const style = getStyle(shapeProps);
+
+  const onChangeTextAreaHandler = (e) => {
+    onChangeHandler({...shapeProps,text : e.currentTarget.value})
+  }
   return (
-    <Html groupProps={{ x, y }} divProps={{ style: { opacity: 1 } }}>
+    <Html
+      groupProps={{ x: shapeProps.x, y: shapeProps.y }}
+      divProps={{ style: { opacity: 1 } }}
+    >
       <textarea
-        value={value}
-        onChange={onChange}
+        value={shapeProps.text}
+        onChange={onChangeTextAreaHandler}
         onKeyDown={onKeyDown}
         style={style}
       />
